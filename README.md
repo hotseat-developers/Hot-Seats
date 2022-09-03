@@ -16,3 +16,7 @@ receive orders in real time and guide the staff on how to prep and cook the meal
 
 - Next.js (Full stack)
 - Supabase (Realtime database built on PostgreSQL that has built in user authentication)
+
+## Wireframes
+
+![Main App](wireframes/Main_Screen.jpg)
