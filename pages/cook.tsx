@@ -1,11 +1,18 @@
 import type { NextPage } from "next"
-import { Typography } from "@mui/material"
+import { Typography, Button } from "@mui/material"
+import Link from "next/link"
 
 const Cook: NextPage = () => {
     return (
         <>
-            <Typography variant="body1">What are we cooking today?</Typography>
+            <Typography variant="h3">What are we cooking today?</Typography>
+             <Button>
+            <Link href="/selection">
+                <Typography variant="button">Back to Selection</Typography>
+                </Link>
+            </Button>
         </>
+
     )
 }
 
