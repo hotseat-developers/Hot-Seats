@@ -1,0 +1,48 @@
+enum TaskType {
+    COOK
+    PREP
+}
+
+enum Role {
+    COOK
+    SALES
+}
+
+model User {
+    id   Int  @id @default(autoincrement())
+    role Role
+}
+
+model Task {
+    id          Int      @id @default(autoincrement())
+    type        TaskType
+    name        String
+    body        String
+    photo       String?
+    cook_time   String?
+    temperature Int?
+    Item        Item     @relation(fields: [itemId], references: [id])
+    itemId      Int
+}
+
+model Item {
+    id     Int           @id @default(autoincrement())
+    name   String
+    steps  Task[]
+    orders ItemOnOrder[]
+}
+
+model Order {
+    id    Int           @id @default(autoincrement())
+    items ItemOnOrder[]
+}
+
+// Trough table for Many 2 Many between items and orders
+model ItemOnOrder {
+    order   Order @relation(fields: [orderId], references: [id])
+    orderId Int
+    item    Item  @relation(fields: [itemId], references: [id])
+    itemId  Int
+
+    @@id([orderId, itemId])
+}
