@@ -9,6 +9,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
 import Typography from "@mui/material/Typography"
 import Container from "@mui/material/Container"
 import Link from "next/link"
+import { useToast } from 'use-toast-mui'
 import { Formik, Form, Field, useField, type FieldAttributes } from "formik"
 import * as yup from 'yup'
 import YupPassword from 'yup-password'
@@ -19,7 +20,7 @@ import type { NextPage } from "next"
 import type { FC } from "react"
 
 import Copyright from "../components/Copyright"
-
+import supabase from '../lib/supabase'
 
 
 const EmailField: FC<FieldAttributes<{}>> = ({
@@ -79,6 +80,8 @@ const validationSchema = yup.object({
 
 const SignUp: NextPage = () => {
 
+    const toast = useToast()
+
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -102,8 +105,9 @@ const SignUp: NextPage = () => {
                         password: "",
                         passwordConfirm: ""
                     }}
-                    onSubmit={(data) => {
-                        console.log(data)
+                    onSubmit={async ({ email, password }) => {
+                        await supabase.auth.signUp({ email, password })
+                        toast.success('Check your email to complete sign up')
                     }}
                     validationSchema={validationSchema}
                     validateOnMount={true}

@@ -9,7 +9,10 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
 import Typography from "@mui/material/Typography"
 import Container from "@mui/material/Container"
 import Link from "next/link"
+import { useRouter } from 'next/router'
+import { useToast } from 'use-toast-mui'
 import { Formik, Form, Field, useField, type FieldAttributes } from "formik"
+import supabase from '../lib/supabase'
 import * as yup from 'yup'
 import YupPassword from 'yup-password'
 
@@ -76,6 +79,9 @@ const validationSchema = yup.object({
 
 const SignUp: NextPage = () => {
 
+    const router = useRouter()
+    const toast = useToast()
+
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -98,8 +104,14 @@ const SignUp: NextPage = () => {
                         email: "",
                         password: "",
                     }}
-                    onSubmit={(data) => {
-                        console.log(data)
+                    onSubmit={async ({ email, password }) => {
+                        const { error } = await supabase.auth.signIn({ email, password })
+                        if (error) {
+                            toast.error('Incorrect details.')
+                        } else {
+                            router.push('/selection')
+                        }
+
                     }}
                     validationSchema={validationSchema}
                     validateOnMount={true}

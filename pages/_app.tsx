@@ -1,8 +1,18 @@
 import type { AppProps } from "next/app"
 import type { NextPage } from "next"
+import type { Session, User } from "@supabase/supabase-js"
+import { useRouter } from "next/router"
+import {
+    useEffect,
+    useState,
+    createContext,
+} from "react"
 import Head from "next/head"
 import { CacheProvider, EmotionCache } from "@emotion/react"
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material"
+import { ToastProvider } from "use-toast-mui"
+import supabase from "../lib/supabase"
+import LogoutButton from '../components/LogoutButton'
 
 import "@fontsource/roboto/300.css"
 import "@fontsource/roboto/400.css"
@@ -16,12 +26,61 @@ interface MyAppProps extends AppProps {
     emotionCache?: EmotionCache
 }
 
+type AuthContextType = {
+    session: Nullable<Session>
+    user: Nullable<User>
+    signOut: () => Promise<void>
+}
+
+export const AuthContext = createContext<AuthContextType>({
+    // Dummy object if the context is accessed outside a provider
+    session: null,
+    user: null,
+    async signOut() {
+        console.log("Signing out")
+    },
+})
+
+type Nullable<T> = T | null
+
 const clientSideEmotionCache = createEmotionCache()
 
 const darkTheme = createTheme(darkThemeOptions)
 
 const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
+    const router = useRouter()
     const emotionCache = clientSideEmotionCache
+
+    const [user, setUser] = useState<Nullable<User>>(null)
+    const [session, setSession] = useState<Nullable<Session>>(null)
+
+    useEffect(() => {
+        const session = supabase.auth.session()
+        setSession(session)
+        setUser(session?.user ?? null)
+
+        if(!session?.user && !['/', '/login', '/signup'].includes(router.asPath)) {
+            router.push('/login')
+        }
+
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+            async (_event, session) => {
+                setSession(session)
+                const currentUser = session?.user
+                setUser(currentUser ?? null)
+            }
+        )
+
+        return () => {
+            authListener?.unsubscribe()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user])
+
+    const signOut = async () => {
+        await supabase.auth.signOut()
+        router.push("/login")
+    }
 
     return (
         <>
@@ -45,14 +104,24 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
                     content="initial-scale=1, width=device-width"
                 />
                 <title>HotSeat</title>
-                <title>HotSeat</title>
             </Head>
-            <CacheProvider value={emotionCache}>
-                <ThemeProvider theme={darkTheme}>
-                    <CssBaseline />
-                    <Component {...pageProps} />
-                </ThemeProvider>
-            </CacheProvider>
+            <AuthContext.Provider
+                value={{
+                    session,
+                    user,
+                    signOut,
+                }}
+            >
+                <ToastProvider>
+                    <CacheProvider value={emotionCache}>
+                        <ThemeProvider theme={darkTheme}>
+                            <CssBaseline />
+                            <Component {...pageProps} />
+                            <LogoutButton />
+                        </ThemeProvider>
+                    </CacheProvider>
+                </ToastProvider>
+            </AuthContext.Provider>
         </>
     )
 }
