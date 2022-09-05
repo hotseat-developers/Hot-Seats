@@ -23,6 +23,10 @@ const POS: NextPage = () => {
         setLineItems([...lineItems, created])
     }
 
+    const removeLineItem= (item: Item) => {
+        setLineItems(lineItems.filter(i => i.id !== item.id))
+    }
+
     useEffect(() => {
         supabase
             .from<Item>("Item")
@@ -36,13 +40,12 @@ const POS: NextPage = () => {
             <Box marginBottom="10px" display="grid" gridTemplateColumns="1fr 2fr" gap="10px">
                 <Box
                     sx={{
-                        display: "inline-grid",
-                        gridAutoRows: "1fr",
-                        gridTemplateColumns: "repeat(1, 1fr)",
+                        display: "flex",
+                        flexDirection: "column",
                         border: "solid",
                         borderColor: "primary.main",
                         placeItems: "center",
-                        minHeight: "80vh"
+                        minHeight: "80vh",
                     }}
                 >
                     {lineItems &&
@@ -55,7 +58,7 @@ const POS: NextPage = () => {
                                 <Typography variant="h5">
                                     {item.name}
                                 </Typography>
-                                <IconButton color="error">
+                                <IconButton color="error" onClick={() => removeLineItem(item)}>
                                     <DeleteForeverOutlinedIcon />
                                 </IconButton>
                             </Box>
