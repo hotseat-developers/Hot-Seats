@@ -27,6 +27,7 @@ model User {
 
 model Task {
     id          Int      @id @default(autoincrement())
+    task_number Int
     type        TaskType
     name        String
     body        String
@@ -46,6 +47,7 @@ model Item {
 
 model Order {
     id    Int           @id @default(autoincrement())
+    time  DateTime      @default(now())
     items ItemOnOrder[]
 }
 

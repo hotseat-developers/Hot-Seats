@@ -2,29 +2,85 @@ import Avatar from "@mui/material/Avatar"
 import Button from "@mui/material/Button"
 import CssBaseline from "@mui/material/CssBaseline"
 import TextField from "@mui/material/TextField"
-import FormControlLabel from "@mui/material/FormControlLabel"
-import Checkbox from "@mui/material/Checkbox"
 import MUILink from "@mui/material/Link"
 import Grid from "@mui/material/Grid"
 import Box from "@mui/material/Box"
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
 import Typography from "@mui/material/Typography"
 import Container from "@mui/material/Container"
+import Link from "next/link"
+import { useRouter } from 'next/router'
+import { useToast } from 'use-toast-mui'
+import { Formik, Form, Field, useField, type FieldAttributes } from "formik"
+import supabase from '../lib/supabase'
+import * as yup from 'yup'
+import YupPassword from 'yup-password'
+
+YupPassword(yup)
+
 import type { NextPage } from "next"
-import Link from 'next/link'
+import type { FC } from "react"
 
-import Copyright from '../components/Copyright'
+import Copyright from "../components/Copyright"
 
 
-const SignIn: NextPage = () => {
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-        const data = new FormData(event.currentTarget)
-        console.log({
-            email: data.get("email"),
-            password: data.get("password"),
-        })
-    }
+
+const EmailField: FC<FieldAttributes<{}>> = ({
+    placeholder,
+    ...props
+}) => {
+    const [field, meta] = useField<{}>(props)
+    const errorText = meta.error && meta.touched ? meta.error : ""
+    return (
+        <TextField
+            placeholder={placeholder}
+            helperText={errorText}
+            error={!!errorText}
+            autoFocus
+            required
+            fullWidth
+            label={placeholder}
+            autoComplete="email"
+            {...field}
+        />
+    )
+}
+
+const PasswordField: FC<FieldAttributes<{}>> = ({
+    placeholder,
+    ...props
+}) => {
+    const [field, meta] = useField<{}>(props)
+    const errorText = meta.error && meta.touched ? meta.error : ""
+    return (
+        <TextField
+            placeholder={placeholder}
+            helperText={errorText}
+            error={!!errorText}
+            autoFocus
+            required
+            fullWidth
+            type="password"
+            label={placeholder}
+            autoComplete="current-password"
+            {...field}
+        />
+    )
+}
+
+const validationSchema = yup.object({
+    email: yup.string().email().required(),
+    password: yup.string().password()
+        .min(8)
+        .minUppercase(1)
+        .minSymbols(1)
+        .required()
+})
+
+const SignUp: NextPage = () => {
+
+    const router = useRouter()
+    const toast = useToast()
 
     return (
         <Container component="main" maxWidth="xs">
@@ -43,63 +99,58 @@ const SignIn: NextPage = () => {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                <Box
-                    component="form"
-                    onSubmit={handleSubmit}
-                    noValidate
-                    sx={{ mt: 1 }}
+                <Formik
+                    initialValues={{
+                        email: "",
+                        password: "",
+                    }}
+                    onSubmit={async ({ email, password }) => {
+                        const { error } = await supabase.auth.signIn({ email, password })
+                        if (error) {
+                            toast.error('Incorrect details.')
+                        } else {
+                            router.push('/selection')
+                        }
+
+                    }}
+                    validationSchema={validationSchema}
+                    validateOnMount={true}
                 >
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                        autoFocus
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                    />
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label="Remember me"
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Sign In
-                    </Button>
-                    <Grid container>
-                        <Grid item xs>
-                            <MUILink href="#" variant="body2">
-                                Forgot password?
-                            </MUILink>
-                        </Grid>
-                        <Grid item>
-                            <Link href="/signup">
-                                <MUILink variant="body2">
-                                    {"Don't have an account? Sign Up"}
-                                </MUILink>
-                            </Link>
-                        </Grid>
-                    </Grid>
-                </Box>
+                    {({ isValid }) => (
+                        <Box component={Form} noValidate sx={{ mt: 3 }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <Field placeholder="Email Address" name="email" as={EmailField} />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Field placeholder="Password" name="password" as={PasswordField} />
+                                </Grid>
+                            </Grid>
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                disabled={!isValid}
+                                sx={{ mt: 3, mb: 2 }}
+                            >
+                                Sign In
+                            </Button>
+                            <Grid container justifyContent="flex-end">
+                                <Grid item>
+                                    <Link href="/signup">
+                                        <MUILink variant="body2">
+                                            Need an account? Sign up
+                                        </MUILink>
+                                    </Link>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    )}
+                </Formik>
             </Box>
-            <Copyright sx={{ mt: 8, mb: 4 }} />
+            <Copyright sx={{ mt: 5 }} />
         </Container>
     )
 }
 
-export default SignIn
+export default SignUp
