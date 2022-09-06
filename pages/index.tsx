@@ -4,7 +4,7 @@ import { Typography } from "@mui/material"
 const Home: NextPage = () => {
     return (
         <>
-            <Typography variant="body1">Hello MUI!</Typography>
+            <Typography variant="body1">Welcome to HotSeat!</Typography>
         </>
     )
 }
