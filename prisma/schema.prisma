@@ -47,6 +47,7 @@ model Item {
 
 model Order {
     id    Int           @id @default(autoincrement())
+    time  DateTime      @default(now())
     items ItemOnOrder[]
 }
 

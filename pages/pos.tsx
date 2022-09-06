@@ -8,6 +8,7 @@ import supabase from "../lib/supabase"
 import AddButton from "../components/AddButton"
 import DeleteButton from "../components/DeleteButton"
 import AddIcon from "@mui/icons-material/Add"
+import CompleteButton from "../components/CompleteButton"
 
 type Item = {
     name: string
@@ -15,15 +16,36 @@ type Item = {
     onClick: () => void
 }
 
+type Order = {
+    id: number,
+    time: Date
+}
+
+type ItemOnOrder = {
+    itemId: number,
+    orderId: number
+}
+
 const POS: NextPage = () => {
     const [items, setItems] = useState<Item[]>([])
     const [lineItems, setLineItems] = useState<Item[]>([])
+
+    const itemOrder = async () => {
+        const { data: insertedOrders, error: orderInsertError } = await supabase
+            .from<Order>('Order')
+            .insert({})
+        if (orderInsertError) throw orderInsertError
+        const { error: lineItemsInsertError } = await supabase
+            .from<ItemOnOrder>('ItemOnOrder')
+            .insert(lineItems.map<ItemOnOrder>(lineItem => ({ itemId: lineItem.id, orderId: insertedOrders[0]?.id })))
+        if (lineItemsInsertError) throw lineItemsInsertError
+    }
 
     const addItem = (created: Item) => {
         setLineItems([...lineItems, created])
     }
 
-    const removeLineItem= (item: Item) => {
+    const removeLineItem = (item: Item) => {
         setLineItems(lineItems.filter(i => i.id !== item.id))
     }
 
@@ -37,7 +59,12 @@ const POS: NextPage = () => {
     return (
         <>
             <Typography variant="h3">Input the order here</Typography>
-            <Box marginBottom="10px" display="grid" gridTemplateColumns="1fr 2fr" gap="10px">
+            <Box
+                marginBottom="10px"
+                display="grid"
+                gridTemplateColumns="1fr 2fr"
+                gap="10px"
+            >
                 <Box
                     sx={{
                         display: "flex",
@@ -58,20 +85,27 @@ const POS: NextPage = () => {
                                 <Typography variant="h5">
                                     {item.name}
                                 </Typography>
-                                <IconButton color="error" onClick={() => removeLineItem(item)}>
+                                <IconButton
+                                    color="error"
+                                    onClick={() => removeLineItem(item)}
+                                >
                                     <DeleteForeverOutlinedIcon />
                                 </IconButton>
                             </Box>
                         ))}
+                    {/* <Button sx={{marginTop: 'auto'}} variant="contained" color="success">Complete order</Button> */}
+                    <CompleteButton
+                        onClick={itemOrder}
+                    />
                 </Box>
                 <Box
                     sx={{
                         display: "flex",
                         flexWrap: "wrap",
                         alignItems: "center",
-                        justifyContent: 'space-evenly',
-                        alignContent: 'flex-start',
-                        gap: '10px'
+                        justifyContent: "space-evenly",
+                        alignContent: "flex-start",
+                        gap: "10px",
                     }}
                 >
                     {items &&
@@ -84,7 +118,10 @@ const POS: NextPage = () => {
                                 <Typography variant="h6">
                                     {item.name}
                                 </Typography>
-                                <IconButton color="success" onClick={() => addItem(item)}>
+                                <IconButton
+                                    color="success"
+                                    onClick={() => addItem(item)}
+                                >
                                     <AddIcon />
                                 </IconButton>
                             </Box>
