@@ -19,6 +19,12 @@ type Item = {
     name: string
 }
 
+type TabTracker = Record<number, number>
+
+type TabTrackerProvider ={
+    updateTab: (orderId: number, newItem: number) => void
+} & TabTracker
+
 type Order = Record<number, Item[]>
 
 type StepTracker = Record<number, Record<number, number>>
@@ -61,7 +67,7 @@ const Cook: NextPage = () => {
     const [activeOrder, setActiveOrder] = useState<number>(0)
     const [activeItem, setActiveItem] = useState<number>(0)
     const [ stepTracker, setStepTracker ] = useState<StepTracker>({})
-
+    const [tabTracker, setTabTracker ] = useState<TabTracker>({})
     useEffect(() => {
         supabase
             .from<ItemOnOrder>("ItemOnOrder")
@@ -85,6 +91,12 @@ const Cook: NextPage = () => {
                         } else {
                             collector[row.Order.id] = { [row.Item.id]: 0 }
                         }
+                        return collector
+                    }, {}) || {}
+                )
+                setTabTracker(
+                    data?.reduce<TabTracker>((collector, row) => {
+                        collector[row.Order.id] = 0
                         return collector
                     }, {}) || {}
                 )
@@ -122,7 +134,7 @@ const Cook: NextPage = () => {
                         value={activeOrder}
                         onChange={(_e, newValue) => {
                             setActiveOrder(newValue)
-                            setActiveItem(0)
+                            setActiveItem(tabTracker[newValue])
                         }}
                     >
                         {orders &&
@@ -145,9 +157,16 @@ const Cook: NextPage = () => {
                             >
                                 <Tabs
                                     value={activeItem}
-                                    onChange={(_e, newValue) =>
+                                    onChange={(_e, newValue) => {
+                                        setTabTracker(tracker => {
+                                            tracker[Number(orderNum)] = newValue
+                                            return tracker
+                                            // Access current active tab from `tracker` and change it
+                                            // tracker[someKey] = newValue
+                                            // return the updated object
+                                        })
                                         setActiveItem(newValue)
-                                    }
+                                    }}
                                 >
                                     {items.map((item, i) => (
                                         <Tab
