@@ -1,16 +1,34 @@
 import type { NextPage } from "next"
-import { useEffect, useState, type FC } from "react"
+import { useEffect, useState, createContext, type FC } from "react"
 import { Typography, Button, Box, Tabs, Tab } from "@mui/material"
 import Link from "next/link"
 import BackButton from "../components/BackButton"
 import supabase from "../lib/supabase"
 import TaskList from "../components/Task"
+import VerticalLinearStepper from "../components/ProgressBar"
+import type { Task } from '../components/Task'
 
 type TabPanelProps = {
     children?: React.ReactNode
     index: number
     value: number
 }
+
+type Item = {
+    id: number
+    name: string
+}
+
+type Order = Record<number, Item[]>
+
+type StepTracker = Record<number, Record<number, number>>
+
+type StepTrackerProvider = {
+    updateStep: (orderId: number, itemId: number, step: number) => void
+} & StepTracker
+
+
+export const StepTrackerContext = createContext<StepTrackerProvider>({ updateStep(_a, _b, _c) { return null }})
 
 const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
     return (
@@ -31,12 +49,7 @@ const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
 }
 
 const Cook: NextPage = () => {
-    type Item = {
-        id: number
-        name: string
-    }
 
-    type Order = Record<number, Item[]>
     type ItemOnOrder = {
         Item: Item
         Order: {
@@ -47,6 +60,7 @@ const Cook: NextPage = () => {
     const [orders, setOrders] = useState<Order>([])
     const [activeOrder, setActiveOrder] = useState<number>(0)
     const [activeItem, setActiveItem] = useState<number>(0)
+    const [ stepTracker, setStepTracker ] = useState<StepTracker>({})
 
     useEffect(() => {
         supabase
@@ -64,6 +78,16 @@ const Cook: NextPage = () => {
                         return collector
                     }, {}) || []
                 )
+                setStepTracker(
+                    data?.reduce<StepTracker>((collector, row) => {
+                        if (row.Order.id in collector) {
+                            collector[row.Order.id][row.Item.id] = 0
+                        } else {
+                            collector[row.Order.id] = { [row.Item.id]: 0 }
+                        }
+                        return collector
+                    }, {}) || {}
+                )
             })
     }, [])
 
@@ -72,7 +96,15 @@ const Cook: NextPage = () => {
     }, [orders])
 
     return (
-        <>
+        <StepTrackerContext.Provider value={{
+            updateStep(orderId, itemId, step=1) {
+                setStepTracker(tracker => {
+                    tracker[orderId][itemId] += step
+                    return tracker
+                })
+            },
+            ...stepTracker
+        }}>
             <Box
                 sx={{
                     display: "grid",
@@ -131,7 +163,7 @@ const Cook: NextPage = () => {
                                         index={i}
                                         value={activeItem}
                                     >
-                                        <TaskList itemId={item.id} />
+                                        <VerticalLinearStepper itemNumber={item.id} orderNumber={Number(orderNum)}/>
                                     </TabPanel>
                                 ))}
                             </TabPanel>
@@ -139,7 +171,7 @@ const Cook: NextPage = () => {
                 </Box>
             </Box>
             <BackButton />
-        </>
+        </StepTrackerContext.Provider>
     )
 }
 

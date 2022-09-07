@@ -4,7 +4,7 @@ import type { FC } from "react"
 import supabase from "../lib/supabase"
 import { useState, useEffect } from "react"
 
-type Task = {
+export type Task = {
     id: number
     type: string
     name: string
