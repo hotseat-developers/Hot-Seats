@@ -4,6 +4,8 @@ import type { FC } from "react"
 import supabase from "../lib/supabase"
 import { useState, useEffect } from "react"
 import { minWidth } from "@mui/system"
+import EditButton from "./EditButton"
+
 
 export type Task = {
     id: number
@@ -20,7 +22,9 @@ export type Task = {
 type TaskProps = {
     arrTasks: Task[]
 }
-
+const editTask = async (task: Task) => {
+    await supabase.from("Task").update(task).eq("id", task.id)
+}
 const TaskList: FC<TaskProps> = ({ arrTasks }) => {
     return (
         <>
@@ -34,7 +38,7 @@ const TaskList: FC<TaskProps> = ({ arrTasks }) => {
                         borderColor: "primary.main",
                         placeItems: "center",
                         margin: "10px",
-                        maxWidth:"80vh"
+                        maxWidth: "80vh",
                     }}
                 >
                     <Typography variant="h6">{task.body}</Typography>
@@ -42,6 +46,7 @@ const TaskList: FC<TaskProps> = ({ arrTasks }) => {
                     <Typography variant="h6">{task.task_number}</Typography>
                     {/* <Typography variant="h6">{task.type}</Typography> */}
                     <Typography variant="h6">{task.itemId}</Typography>
+                    <EditButton onClick={()=> editTask(task)} />
                 </Box>
             ))}
         </>

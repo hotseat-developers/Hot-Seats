@@ -13,6 +13,7 @@ import TextField from "@mui/material/TextField"
 import * as yup from "yup"
 import ErrorMessage from "../../components/ErrorMessage"
 import TaskView from "../../components/TaskView"
+import EditButton from "../../components/EditButton"
 
 const CustomTextField: FC<FieldAttributes<{}>> = ({
     placeholder,
@@ -73,7 +74,7 @@ const EditPage: FC<EditTaskProps> = ({ item, tasker }) => {
     const [collapsed, toggleCollapsed] = useToggle(true)
     const [error, setError] = useState<string>()
     const editTask = async (task: Task) => {
-        await supabase.from("Task").update({ id: "id" }).eq("id", task.id)
+        await supabase.from("Task").update(task).eq("id", task.id)
     }
     const addTask = (created: Task) => {
         setTasks([...tasks, created])
@@ -89,7 +90,7 @@ const EditPage: FC<EditTaskProps> = ({ item, tasker }) => {
                     <Typography variant="button">Add a new task</Typography>
                 </Button>
             </div>
-            ) : (
+             { !collapsed && (
             <div className="flex flex-col gap-2 bg-dots-pattern bg-dots-color shadow-hard-border border-black p-3">
                 <h2 className="text-3xl font-bangers tracking-wide text-white text-outline-black">
                     New Task
@@ -158,6 +159,8 @@ const EditPage: FC<EditTaskProps> = ({ item, tasker }) => {
                     )}
                 </Formik>
             </div>
+)}
+
             <Button variant="contained">
                 <Typography variant="button">
                     <div onClick={() => Router.back()}>Go Back</div>
