@@ -72,7 +72,7 @@ const NewItem: FC<NewItemProps> = ({ onCreate }) => {
                         setError(undefined)
                     } catch (e: any) {
                         console.log(e)
-                        setError("Could not find this comic, sorry")
+                        setError("Could not find this item, sorry")
                     } finally {
                     }
                 }}
