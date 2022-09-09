@@ -11,29 +11,8 @@ import { Typography, IconButton } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import { StepTrackerContext } from "../pages/cook"
-
-const steps = [
-    {
-        label: "Pull",
-        description: `Time to pull the items you need for the order!`,
-    },
-    {
-        label: "Portion",
-        description: "Don't forget to portion correctly. Consistency is key.",
-    },
-    {
-        label: "Cook",
-        description: `Well obviously don't forget to cook the food.`,
-    },
-    {
-        label: "Plate",
-        description: `Time to express your art! The plate is your canvas!`,
-    },
-    {
-        label: "Order Complete",
-        description: `GET THAT SHIT OUT`,
-    },
-]
+import type { Task } from "./Task"
+import supabase from "../lib/supabase"
 
 type VerticalLinearStepperProps = {
     orderNumber: number
@@ -45,6 +24,16 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
     itemNumber,
 }) => {
     const stepTracker = useContext(StepTrackerContext)
+
+    const [steps, setSteps] = React.useState<Task[]>([])
+
+    React.useEffect(() => {
+        supabase
+            .from<Task>("Task")
+            .select("*")
+            .eq("itemId", itemNumber)
+            .then(({ data }) => setSteps(data || []))
+    }, [itemNumber])
 
     const [activeStep, setActiveStep] = React.useState(
         stepTracker[orderNumber][itemNumber]
@@ -65,55 +54,59 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
     }
 
     return (
-        <Box sx={{ maxWidth: 400 }}>
-            <Stepper activeStep={activeStep} orientation="vertical">
-                {steps.map((step, index) => (
-                    <Step key={step.label}>
-                        <StepLabel
-                            optional={
-                                index === 2 ? (
-                                    <Typography variant="caption">
-                                        Last step
-                                    </Typography>
-                                ) : null
-                            }
-                        >
-                            {step.label}
-                        </StepLabel>
-                        <StepContent>
-                            <Typography>{step.description}</Typography>
-                            <Box sx={{ mb: 2 }}>
-                                <div>
-                                    <IconButton
-                                        disabled={index === 0}
-                                        onClick={handleBack}
-                                        sx={{ mt: 1, mr: 1 }}
-                                    >
-                                        <ArrowBackIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={handleNext}
-                                        sx={{ mt: 1, mr: 1 }}
-                                    >
-                                        <ArrowForwardIcon />
-                                    </IconButton>
-                                </div>
-                            </Box>
-                        </StepContent>
-                    </Step>
-                ))}
-            </Stepper>
-            {activeStep === steps.length && (
-                <Paper square elevation={0} sx={{ p: 3 }}>
-                    <Typography>
-                        All steps completed - you&apos;re finished
-                    </Typography>
-                    <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-                        Reset
-                    </Button>
-                </Paper>
+        <>
+            {steps && (
+                <Box sx={{ maxWidth: 400 }}>
+                    <Stepper activeStep={activeStep} orientation="vertical">
+                        {steps.map((step, index) => (
+                            <Step key={step.name}>
+                                <StepLabel
+                                    optional={
+                                        index === 2 ? (
+                                            <Typography variant="caption">
+                                                Last step
+                                            </Typography>
+                                        ) : null
+                                    }
+                                >
+                                    {step.name}
+                                </StepLabel>
+                                <StepContent>
+                                    <Typography>{step.body}</Typography>
+                                    <Box sx={{ mb: 2 }}>
+                                        <div>
+                                            <IconButton
+                                                disabled={index === 0}
+                                                onClick={handleBack}
+                                                sx={{ mt: 1, mr: 1 }}
+                                            >
+                                                <ArrowBackIcon />
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={handleNext}
+                                                sx={{ mt: 1, mr: 1 }}
+                                            >
+                                                <ArrowForwardIcon />
+                                            </IconButton>
+                                        </div>
+                                    </Box>
+                                </StepContent>
+                            </Step>
+                        ))}
+                    </Stepper>
+                    {activeStep === steps.length && (
+                        <Paper square elevation={0} sx={{ p: 3 }}>
+                            <Typography>
+                                All steps completed - you&apos;re finished
+                            </Typography>
+                            <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
+                                Reset
+                            </Button>
+                        </Paper>
+                    )}
+                </Box>
             )}
-        </Box>
+        </>
     )
 }
 

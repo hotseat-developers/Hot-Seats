@@ -64,6 +64,7 @@ const Cook: NextPage = () => {
         }
     }
     const [orders, setOrders] = useState<Order>([])
+    const [ tasks, setTasks ] = useState<Task[]>([])
     const [activeOrder, setActiveOrder] = useState<number>(0)
     const [activeItem, setActiveItem] = useState<number>(0)
     const [ stepTracker, setStepTracker ] = useState<StepTracker>({})
