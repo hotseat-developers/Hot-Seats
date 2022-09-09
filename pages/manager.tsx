@@ -8,7 +8,7 @@ import BackButton from "../components/BackButton"
 import DeleteButton from "../components/DeleteButton"
 import AddButton from "../components/AddButton"
 import type { Task } from "../components/Task"
-
+import EditButton from "../components/EditButton"
 
 type Item = {
     name: string
