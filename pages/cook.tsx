@@ -7,7 +7,7 @@ import supabase from "../lib/supabase"
 import TaskList from "../components/Task"
 import VerticalLinearStepper from "../components/ProgressBar"
 import type { Task } from "../components/Task"
-import formatDate from '../lib/dateFormatting'
+import formatTime from '../lib/formatting/time'
 
 type TabPanelProps = {
     children?: React.ReactNode
@@ -192,7 +192,7 @@ const Cook: NextPage = () => {
                                             value={activeItem}
                                         >
                                             <Typography variant="h5">Order #{item.Order.id.toString().padStart(3, '0')}</Typography>
-                                            <Typography variant="h6">Order Time: {formatDate(item.Order.time)}</Typography>
+                                            <Typography variant="h6">Order Time: {formatTime(item.Order.time)}</Typography>
                                             <VerticalLinearStepper
                                                 itemNumber={item.Item.id}
                                                 orderNumber={Number(orderNum)}
