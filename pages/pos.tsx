@@ -1,5 +1,5 @@
 import type { NextPage } from "next"
-import { Typography, Box, IconButton } from "@mui/material"
+import { Typography, Box, IconButton, Button, ButtonGroup } from "@mui/material"
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined"
 import BackButton from "../components/BackButton"
 import { useState, useEffect } from "react"
@@ -63,6 +63,11 @@ const POS: NextPage = () => {
         setLineItems(lineItems.filter(i => i.id !== item.id))
     }
 
+    const clearLineItems = () => {
+        setLineItems([])
+        toast.warning('Items cleared')
+    }
+
     useEffect(() => {
         supabase
             .from<Item>("Item")
@@ -107,8 +112,14 @@ const POS: NextPage = () => {
                                 </IconButton>
                             </Box>
                         ))}
-                    {/* <Button sx={{marginTop: 'auto'}} variant="contained" color="success">Complete order</Button> */}
-                    <CompleteButton onClick={itemOrder} />
+                    <ButtonGroup sx={{
+                        marginTop: 'auto',
+                        marginBottom: '5px',
+                        width: '95%'
+                    }} fullWidth>
+                        <CompleteButton onClick={itemOrder} />
+                        <Button variant="contained" color="warning" onClick={clearLineItems}>Clear Items</Button>
+                    </ButtonGroup>
                 </Box>
                 <Box
                     sx={{
