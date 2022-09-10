@@ -1,5 +1,6 @@
 import type { NextPage } from "next"
 import { Typography, Box, IconButton, Button, ButtonGroup } from "@mui/material"
+import { LoadingButton } from "@mui/lab"
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined"
 import BackButton from "../components/BackButton"
 import { useState, useEffect } from "react"
@@ -27,10 +28,12 @@ type ItemOnOrder = {
 const POS: NextPage = () => {
     const [items, setItems] = useState<Item[]>([])
     const [lineItems, setLineItems] = useState<Item[]>([])
+    const [ submitting, setSubmitting ] = useState<boolean>(false)
 
     const toast = useToast()
 
     const itemOrder = async () => {
+        setSubmitting(true)
         const { data: insertedOrders, error: orderInsertError } = await supabase
             .from<Order>("Order")
             .insert({})
@@ -53,6 +56,7 @@ const POS: NextPage = () => {
             toast.success(`Order #${insertedOrders[0].id.toString().padStart(3, '0')} submitted successfully!`)
             setLineItems([])
         }
+        setSubmitting(false)
     }
 
     const addItem = (created: Item) => {
@@ -117,7 +121,7 @@ const POS: NextPage = () => {
                         marginBottom: '5px',
                         width: '95%'
                     }} fullWidth>
-                        <CompleteButton onClick={itemOrder} />
+                        <CompleteButton onClick={itemOrder} loading={submitting} />
                         <Button variant="contained" color="warning" onClick={clearLineItems}>Clear Items</Button>
                     </ButtonGroup>
                 </Box>
