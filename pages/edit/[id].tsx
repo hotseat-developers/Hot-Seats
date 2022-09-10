@@ -14,26 +14,8 @@ import * as yup from "yup"
 import ErrorMessage from "../../components/ErrorMessage"
 import TaskView from "../../components/TaskView"
 import EditButton from "../../components/EditButton"
+import CustomTextField from "../../components/CustomTextField"
 
-const CustomTextField: FC<FieldAttributes<{}>> = ({
-    placeholder,
-    ...props
-}) => {
-    const [field, meta] = useField<{}>(props)
-    const errorText = meta.error && meta.touched ? meta.error : ""
-    return (
-        <TextField
-            placeholder={placeholder}
-            helperText={errorText}
-            error={!!errorText}
-            autoFocus
-            required
-            fullWidth
-            label={placeholder}
-            {...field}
-        />
-    )
-}
 
 type Item = {
     name: string
@@ -84,7 +66,7 @@ const EditPage: FC<EditTaskProps> = ({ item, tasker }) => {
     return (
         <>
             <Typography variant="h1">{item.name}</Typography>
-            <TaskView arrTasks={tasks} />
+            <TaskView arrTasks={tasks} setParentTasks={setTasks}/>
             <div>
                 <Button variant="contained" onClick={toggleCollapsed}>
                     <Typography variant="button">Add a new task</Typography>
