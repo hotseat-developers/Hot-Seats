@@ -6,7 +6,7 @@ import BackButton from "../components/BackButton"
 import supabase from "../lib/supabase"
 import TaskList from "../components/Task"
 import VerticalLinearStepper from "../components/ProgressBar"
-import type { Task } from '../components/Task'
+import type { Task } from "../components/Task"
 
 type TabPanelProps = {
     children?: React.ReactNode
@@ -21,11 +21,19 @@ type Item = {
 
 type TabTracker = Record<number, number>
 
-type TabTrackerProvider ={
+type TabTrackerProvider = {
     updateTab: (orderId: number, newItem: number) => void
 } & TabTracker
 
-type Order = Record<number, Item[]>
+type ItemOnOrder = {
+    Item: Item
+    Order: {
+        id: number
+        time: string
+    }
+}
+
+type Order = Record<number, ItemOnOrder[]>
 
 type StepTracker = Record<number, Record<number, number>>
 
@@ -33,8 +41,11 @@ type StepTrackerProvider = {
     updateStep: (orderId: number, itemId: number, step: number) => void
 } & StepTracker
 
-
-export const StepTrackerContext = createContext<StepTrackerProvider>({ updateStep(_a, _b, _c) { return null }})
+export const StepTrackerContext = createContext<StepTrackerProvider>({
+    updateStep(_a, _b, _c) {
+        return null
+    },
+})
 
 const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
     return (
@@ -55,20 +66,12 @@ const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
 }
 
 const Cook: NextPage = () => {
-
-    type ItemOnOrder = {
-        Item: Item
-        Order: {
-            id: number
-            time: Date
-        }
-    }
     const [orders, setOrders] = useState<Order>([])
-    const [ tasks, setTasks ] = useState<Task[]>([])
+    const [tasks, setTasks] = useState<Task[]>([])
     const [activeOrder, setActiveOrder] = useState<number>(0)
     const [activeItem, setActiveItem] = useState<number>(0)
-    const [ stepTracker, setStepTracker ] = useState<StepTracker>({})
-    const [tabTracker, setTabTracker ] = useState<TabTracker>({})
+    const [stepTracker, setStepTracker] = useState<StepTracker>({})
+    const [tabTracker, setTabTracker] = useState<TabTracker>({})
     useEffect(() => {
         supabase
             .from<ItemOnOrder>("ItemOnOrder")
@@ -78,9 +81,9 @@ const Cook: NextPage = () => {
                 setOrders(
                     data?.reduce<Order>((collector, row) => {
                         if (row.Order.id in collector) {
-                            collector[row.Order.id].push(row.Item)
+                            collector[row.Order.id].push(row)
                         } else {
-                            collector[row.Order.id] = [row.Item]
+                            collector[row.Order.id] = [row]
                         }
                         return collector
                     }, {}) || []
@@ -109,15 +112,17 @@ const Cook: NextPage = () => {
     }, [orders])
 
     return (
-        <StepTrackerContext.Provider value={{
-            updateStep(orderId, itemId, step=1) {
-                setStepTracker(tracker => {
-                    tracker[orderId][itemId] += step
-                    return tracker
-                })
-            },
-            ...stepTracker
-        }}>
+        <StepTrackerContext.Provider
+            value={{
+                updateStep(orderId, itemId, step = 1) {
+                    setStepTracker(tracker => {
+                        tracker[orderId][itemId] += step
+                        return tracker
+                    })
+                },
+                ...stepTracker,
+            }}
+        >
             <Box
                 sx={{
                     display: "grid",
@@ -151,42 +156,50 @@ const Cook: NextPage = () => {
                 <Box sx={{ gridColumn: "span 2" }}>
                     {orders &&
                         Object.entries(orders).map(([orderNum, items]) => (
-                            <TabPanel
-                                value={activeOrder}
-                                index={Number(orderNum)}
-                                key={`order-tabpanel-${orderNum}`}
-                            >
-                                <Tabs
-                                    value={activeItem}
-                                    onChange={(_e, newValue) => {
-                                        setTabTracker(tracker => {
-                                            tracker[Number(orderNum)] = newValue
-                                            return tracker
-                                            // Access current active tab from `tracker` and change it
-                                            // tracker[someKey] = newValue
-                                            // return the updated object
-                                        })
-                                        setActiveItem(newValue)
-                                    }}
+                            <>
+                                <TabPanel
+                                    value={activeOrder}
+                                    index={Number(orderNum)}
+                                    key={`order-tabpanel-${orderNum}`}
                                 >
-                                    {items.map((item, i) => (
-                                        <Tab
-                                            key={`order-tab-${orderNum}-item-${item.id}`}
-                                            label={item.name}
-                                            value={i}
-                                        />
-                                    ))}
-                                </Tabs>
-                                {items.map((item, i) => (
-                                    <TabPanel
-                                        key={`order-tab-${orderNum}-item-${item.id}-panel`}
-                                        index={i}
+                                    <Tabs
                                         value={activeItem}
+                                        onChange={(_e, newValue) => {
+                                            setTabTracker(tracker => {
+                                                tracker[Number(orderNum)] =
+                                                    newValue
+                                                return tracker
+                                                // Access current active tab from `tracker` and change it
+                                                // tracker[someKey] = newValue
+                                                // return the updated object
+                                            })
+                                            setActiveItem(newValue)
+                                        }}
                                     >
-                                        <VerticalLinearStepper itemNumber={item.id} orderNumber={Number(orderNum)}/>
-                                    </TabPanel>
-                                ))}
-                            </TabPanel>
+                                        {items.map((item, i) => (
+                                            <Tab
+                                                key={`order-tab-${orderNum}-item-${item.Item.id}`}
+                                                label={item.Item.name}
+                                                value={i}
+                                            />
+                                        ))}
+                                    </Tabs>
+                                    {items.map((item, i) => (
+                                        <TabPanel
+                                            key={`order-tab-${orderNum}-item-${item.Item.id}-panel`}
+                                            index={i}
+                                            value={activeItem}
+                                        >
+                                            <Typography variant="h5">Order #{item.Order.id.toString().padStart(3, '0')}</Typography>
+                                            <Typography variant="h6">Order Time: {new Date(item.Order.time).toLocaleTimeString('en-us', {timeStyle: "short"})}</Typography>
+                                            <VerticalLinearStepper
+                                                itemNumber={item.Item.id}
+                                                orderNumber={Number(orderNum)}
+                                            />
+                                        </TabPanel>
+                                    ))}
+                                </TabPanel>
+                            </>
                         ))}
                 </Box>
             </Box>
