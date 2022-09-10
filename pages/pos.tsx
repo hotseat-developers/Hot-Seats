@@ -1,14 +1,12 @@
 import type { NextPage } from "next"
-import { Typography, Box, Button, IconButton } from "@mui/material"
+import { Typography, Box, IconButton } from "@mui/material"
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined"
 import BackButton from "../components/BackButton"
-import NewItem from "../components/NewItem"
 import { useState, useEffect } from "react"
 import supabase from "../lib/supabase"
-import AddButton from "../components/AddButton"
-import DeleteButton from "../components/DeleteButton"
 import AddIcon from "@mui/icons-material/Add"
 import CompleteButton from "../components/CompleteButton"
+import { useToast } from "use-toast-mui"
 
 type Item = {
     name: string
@@ -17,12 +15,12 @@ type Item = {
 }
 
 type Order = {
-    id: number,
+    id: number
     time: Date
 }
 
 type ItemOnOrder = {
-    itemId: number,
+    itemId: number
     orderId: number
 }
 
@@ -30,15 +28,30 @@ const POS: NextPage = () => {
     const [items, setItems] = useState<Item[]>([])
     const [lineItems, setLineItems] = useState<Item[]>([])
 
+    const toast = useToast()
+
     const itemOrder = async () => {
         const { data: insertedOrders, error: orderInsertError } = await supabase
-            .from<Order>('Order')
+            .from<Order>("Order")
             .insert({})
-        if (orderInsertError) throw orderInsertError
+        if (orderInsertError) {
+            toast.error('An unexpected error has occured.')
+            throw orderInsertError
+        }
         const { error: lineItemsInsertError } = await supabase
-            .from<ItemOnOrder>('ItemOnOrder')
-            .insert(lineItems.map<ItemOnOrder>(lineItem => ({ itemId: lineItem.id, orderId: insertedOrders[0]?.id })))
-        if (lineItemsInsertError) throw lineItemsInsertError
+            .from<ItemOnOrder>("ItemOnOrder")
+            .insert(
+                lineItems.map<ItemOnOrder>(lineItem => ({
+                    itemId: lineItem.id,
+                    orderId: insertedOrders[0]?.id,
+                }))
+            )
+        if (lineItemsInsertError) {
+            toast.error('An unexpected error has occured.')
+            throw lineItemsInsertError
+        } else {
+            toast.success(`Order #${insertedOrders[0].id.toString().padStart(3, '0')} submitted successfully!`)
+        }
     }
 
     const addItem = (created: Item) => {
@@ -94,9 +107,7 @@ const POS: NextPage = () => {
                             </Box>
                         ))}
                     {/* <Button sx={{marginTop: 'auto'}} variant="contained" color="success">Complete order</Button> */}
-                    <CompleteButton
-                        onClick={itemOrder}
-                    />
+                    <CompleteButton onClick={itemOrder} />
                 </Box>
                 <Box
                     sx={{
