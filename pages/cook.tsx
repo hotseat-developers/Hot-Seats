@@ -1,5 +1,5 @@
 import type { NextPage } from "next"
-import { useEffect, useState, createContext, type FC } from "react"
+import { Fragment, useEffect, useState, createContext, type FC } from "react"
 import { Typography, Button, Box, Tabs, Tab } from "@mui/material"
 import Link from "next/link"
 import BackButton from "../components/BackButton"
@@ -7,6 +7,7 @@ import supabase from "../lib/supabase"
 import TaskList from "../components/Task"
 import VerticalLinearStepper from "../components/ProgressBar"
 import type { Task } from "../components/Task"
+import formatDate from '../lib/dateFormatting'
 
 type TabPanelProps = {
     children?: React.ReactNode
@@ -156,7 +157,7 @@ const Cook: NextPage = () => {
                 <Box sx={{ gridColumn: "span 2" }}>
                     {orders &&
                         Object.entries(orders).map(([orderNum, items]) => (
-                            <>
+                            <Fragment key={orderNum}>
                                 <TabPanel
                                     value={activeOrder}
                                     index={Number(orderNum)}
@@ -191,7 +192,7 @@ const Cook: NextPage = () => {
                                             value={activeItem}
                                         >
                                             <Typography variant="h5">Order #{item.Order.id.toString().padStart(3, '0')}</Typography>
-                                            <Typography variant="h6">Order Time: {new Date(item.Order.time).toLocaleTimeString('en-us', {timeStyle: "short"})}</Typography>
+                                            <Typography variant="h6">Order Time: {formatDate(item.Order.time)}</Typography>
                                             <VerticalLinearStepper
                                                 itemNumber={item.Item.id}
                                                 orderNumber={Number(orderNum)}
@@ -199,7 +200,7 @@ const Cook: NextPage = () => {
                                         </TabPanel>
                                     ))}
                                 </TabPanel>
-                            </>
+                            </Fragment>
                         ))}
                 </Box>
             </Box>
