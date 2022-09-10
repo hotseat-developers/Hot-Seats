@@ -51,6 +51,7 @@ const POS: NextPage = () => {
             throw lineItemsInsertError
         } else {
             toast.success(`Order #${insertedOrders[0].id.toString().padStart(3, '0')} submitted successfully!`)
+            setLineItems([])
         }
     }
 
