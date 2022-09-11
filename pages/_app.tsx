@@ -6,10 +6,11 @@ import {
     useEffect,
     useState,
     createContext,
+    StrictMode
 } from "react"
 import Head from "next/head"
 import { CacheProvider, EmotionCache } from "@emotion/react"
-import { ThemeProvider, CssBaseline, createTheme } from "@mui/material"
+import { ThemeProvider, CssBaseline, createTheme, Box} from "@mui/material"
 import { ToastProvider } from "use-toast-mui"
 import supabase from "../lib/supabase"
 import LogoutButton from '../components/LogoutButton'
@@ -83,7 +84,7 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
     }
 
     return (
-        <>
+        <StrictMode>
             <Head>
                 <meta
                     name="description"
@@ -116,13 +117,19 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
                     <CacheProvider value={emotionCache}>
                         <ThemeProvider theme={darkTheme}>
                             <CssBaseline />
-                            <Component {...pageProps} />
-                            <LogoutButton />
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                minHeight: '100vh'
+                            }}>
+                                <Component {...pageProps} />
+                                <LogoutButton />
+                            </Box>
                         </ThemeProvider>
                     </CacheProvider>
                 </ToastProvider>
             </AuthContext.Provider>
-        </>
+        </StrictMode>
     )
 }
 

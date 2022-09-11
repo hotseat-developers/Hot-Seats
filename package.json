@@ -20,6 +20,7 @@
     "@prisma/client": "^4.3.1",
     "@supabase/supabase-js": "^1.35.6",
     "formik": "^2.2.9",
+    "luxon": "^3.0.3",
     "next": "12.2.5",
     "prisma": "^4.3.1",
     "react": "18.2.0",
@@ -31,6 +32,7 @@
     "yup-password": "^0.2.2"
   },
   "devDependencies": {
+    "@types/luxon": "^3.0.1",
     "@types/node": "18.7.14",
     "@types/react": "18.0.18",
     "@types/react-dom": "18.0.6",

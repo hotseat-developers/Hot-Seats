@@ -12,8 +12,8 @@ const LogoutButton: FC = () => {
                 startIcon={<ExitToAppIcon />}
                 sx={{
                     position: "absolute",
-                    bottom: 10,
-                    left: 10,
+                    top: 10,
+                    right: 10,
                 }}
                 onClick={signOut}
             >

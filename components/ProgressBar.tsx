@@ -10,9 +10,12 @@ import Paper from "@mui/material/Paper"
 import { Typography, IconButton } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { StepTrackerContext } from "../pages/cook"
 import type { Task } from "./Task"
 import supabase from "../lib/supabase"
+import { ItemScreenContext } from './ItemScreen'
 
 type VerticalLinearStepperProps = {
     orderNumber: number
@@ -24,6 +27,7 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
     itemNumber,
 }) => {
     const stepTracker = useContext(StepTrackerContext)
+    const item = useContext(ItemScreenContext)
 
     const [steps, setSteps] = React.useState<Task[]>([])
 
@@ -35,22 +39,10 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
             .then(({ data }) => setSteps(data || []))
     }, [itemNumber])
 
-    const [activeStep, setActiveStep] = React.useState(
-        stepTracker[orderNumber][itemNumber]
-    )
-
-    const handleNext = () => {
-        stepTracker.updateStep(orderNumber, itemNumber, 1)
-        setActiveStep(activeStep + 1)
-    }
-
-    const handleBack = () => {
-        stepTracker.updateStep(orderNumber, itemNumber, -1)
-        setActiveStep(activeStep - 1)
-    }
+    const activeStep = stepTracker[orderNumber][itemNumber]
 
     const handleReset = () => {
-        setActiveStep(0)
+        stepTracker.updateStep(orderNumber, itemNumber, -item.Item.Task.length)
     }
 
     return (
@@ -68,29 +60,10 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
                                             </Typography>
                                         ) : null
                                     }
+                                    StepIconComponent={step.type === 'PREP' ? MenuBookIcon : WhatshotIcon}
                                 >
                                     {step.name}
                                 </StepLabel>
-                                <StepContent>
-                                    <Typography>{step.body}</Typography>
-                                    <Box sx={{ mb: 2 }}>
-                                        <div>
-                                            <IconButton
-                                                disabled={index === 0}
-                                                onClick={handleBack}
-                                                sx={{ mt: 1, mr: 1 }}
-                                            >
-                                                <ArrowBackIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={handleNext}
-                                                sx={{ mt: 1, mr: 1 }}
-                                            >
-                                                <ArrowForwardIcon />
-                                            </IconButton>
-                                        </div>
-                                    </Box>
-                                </StepContent>
                             </Step>
                         ))}
                     </Stepper>
