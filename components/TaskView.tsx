@@ -10,7 +10,6 @@ import CustomTextField from "./CustomTextField"
 import Attribute from "./Attributes"
 import { useToggle } from "react-use"
 
-
 export type Task = {
     id: number
     type: string
@@ -24,28 +23,34 @@ export type Task = {
 }
 
 type TaskProps = {
-    arrTasks: Task[],
-    setParentTasks:Function
+    arrTasks: Task[]
+    setParentTasks: Function
 }
 
+type EditButtons = Record<string, boolean>
 const editTask = async (task: Task) => {
     await supabase.from("Task").update(task).eq("id", task.id)
 }
-const TaskList: FC<TaskProps> = ({ arrTasks,setParentTasks }) => {
+const TaskList: FC<TaskProps> = ({ arrTasks, setParentTasks }) => {
     const [configures, setConfigure] = useState<boolean>(false)
-    const [ editing, toggleEditing ] = useToggle(false)
     const [tasks, setTasks] = useState<Task[]>(arrTasks)
+    const [editing, setEditing] = useState<EditButtons>(
+        Object.fromEntries(tasks.map(i => [i.id, false]))
+    )
 
-
-    const editButtonClick = (submitFunc: Function) => {
-        if(editing) {
+    const editButtonClick = (submitFunc: Function, id: number) => {
+        if (editing[id]) {
             submitFunc()
         }
-        toggleEditing()
-
+        setEditing(
+            Object.fromEntries(
+                Object.entries(editing).map(([taskId, isEditing]) => [
+                    taskId,
+                    taskId == id.toString() ? !isEditing : isEditing,
+                ])
+            )
+        )
     }
-
-
 
     return (
         <>
@@ -69,12 +74,14 @@ const TaskList: FC<TaskProps> = ({ arrTasks,setParentTasks }) => {
                                 .from("Task")
                                 .update(values)
                                 .eq("id", task.id)
-                                setParentTasks(tasks.map(t => t.id === task.id ? values : t))
+                            setParentTasks(
+                                tasks.map(t => (t.id === task.id ? values : t))
+                            )
                         }}
                     >
-                        {({submitForm}) => (
+                        {({ submitForm }) => (
                             <Form className="font-bangers text-white text-3xl">
-                                {editing ? (
+                                {editing[task.id] ? (
                                     <Box
                                         display="flex"
                                         flexDirection="column"
@@ -127,14 +134,15 @@ const TaskList: FC<TaskProps> = ({ arrTasks,setParentTasks }) => {
 
                                 <button
                                     type="button"
-                                    onClick={() => editButtonClick(submitForm)}
+                                    onClick={() =>
+                                        editButtonClick(submitForm, task.id)
+                                    }
                                 >
-                                    {editing ? "Submit Changes" : "Edit"}
+                                    {editing[task.id] ? "Submit Changes" : "Edit"}
                                 </button>
                             </Form>
                         )}
                     </Formik>
-                    
                 </Box>
             ))}
         </>
