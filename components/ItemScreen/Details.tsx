@@ -12,6 +12,7 @@ import { StepTrackerContext } from "../../pages/cook"
 const Details: FC = () => {
     const tracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
+<<<<<<< HEAD
     const activeStep = tracker[item.Order.id][item.Item.id]
     const task = item.Item.Task[activeStep]
 
@@ -22,6 +23,31 @@ const Details: FC = () => {
     const handleBack = () => {
         tracker.updateStep(item.Order.id, item.Item.id, -1)
     }
+
+    return (
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                minhHeight: "100%",
+            }}
+        >
+            {task ? (
+                <>
+                    <Typography variant="h4">{task.name}</Typography>
+                    <Typography variant="body1">{task.body}</Typography>
+                </>
+            ) : (
+                <>
+                    <Typography variant="h4">All Steps Completed</Typography>
+                </>
+            )}
+=======
+
+    return (
+        <Box>
+            <Typography variant="body1">{JSON.stringify(item.Item.Task[tracker[item.Order.id][item.Item.id]], null, 2)}</Typography>
+>>>>>>> f33e7fc (Finished order screen)
 
     return (
         <Box
