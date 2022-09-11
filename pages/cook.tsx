@@ -7,8 +7,9 @@ import supabase from "../lib/supabase"
 import TaskList from "../components/Task"
 import VerticalLinearStepper from "../components/ProgressBar"
 import type { Task } from "../components/Task"
-import formatTime from '../lib/formatting/time'
-import formatOrder from '../lib/formatting/order'
+import formatTime from "../lib/formatting/time"
+import formatOrder from "../lib/formatting/order"
+import ItemScreen from '../components/ItemScreen'
 
 type TabPanelProps = {
     children?: React.ReactNode
@@ -28,7 +29,19 @@ type TabTrackerProvider = {
 } & TabTracker
 
 type ItemOnOrder = {
-    Item: Item
+    Item: Item & {
+        Task: {
+            id: number
+            type: string
+            name: string
+            body: string
+            photo: string
+            cook_time: number
+            temperature: number
+            itemId: number
+            task_number: number
+        }[]
+    }
     Order: {
         id: number
         time: string
@@ -77,8 +90,9 @@ const Cook: NextPage = () => {
     useEffect(() => {
         supabase
             .from<ItemOnOrder>("ItemOnOrder")
-            .select("Item(*),Order(*)")
+            .select("Item(*, Task(*)),Order(*)")
             .then(({ data }) => {
+                console.log("Data is", data)
                 setActiveOrder(Math.min(...(data?.map(d => d.Order.id) || [0])))
                 setOrders(
                     data?.reduce<Order>((collector, row) => {
@@ -116,13 +130,13 @@ const Cook: NextPage = () => {
     return (
         <StepTrackerContext.Provider
             value={{
+                ...stepTracker,
                 updateStep(orderId, itemId, step = 1) {
                     setStepTracker(tracker => {
                         tracker[orderId][itemId] += step
                         return tracker
                     })
-                },
-                ...stepTracker,
+                }
             }}
         >
             <Box
@@ -192,12 +206,7 @@ const Cook: NextPage = () => {
                                             index={i}
                                             value={activeItem}
                                         >
-                                            <Typography variant="h5">Order #{formatOrder(item.Order.id)}</Typography>
-                                            <Typography variant="h6">Order Time: {formatTime(item.Order.time)}</Typography>
-                                            <VerticalLinearStepper
-                                                itemNumber={item.Item.id}
-                                                orderNumber={Number(orderNum)}
-                                            />
+                                            <ItemScreen {...item} />
                                         </TabPanel>
                                     ))}
                                 </TabPanel>
