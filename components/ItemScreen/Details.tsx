@@ -8,10 +8,20 @@ import { StepTrackerContext } from '../../pages/cook'
 const Details: FC = () => {
     const tracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
+    const task = item.Item.Task[tracker[item.Order.id][item.Item.id]]
 
     return (
         <Box>
-            <Typography variant="body1">{JSON.stringify(item.Item.Task[tracker[item.Order.id][item.Item.id]], null, 2)}</Typography>
+            { task ? (
+                <>
+                    <Typography variant="h4">{task.name}</Typography>
+                    <Typography variant="body1">{task.body}</Typography>
+                </>
+            ) : (
+                <>
+                    <Typography variant="h4">All Steps Completed</Typography>
+                </>
+            )}
 
         </Box>
     )

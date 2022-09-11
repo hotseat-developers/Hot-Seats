@@ -1,5 +1,6 @@
 import { createContext, type FC } from "react"
 
+import Box from "@mui/material/Box"
 import Details from "./Details"
 import Overview from "./Overview"
 
@@ -47,8 +48,13 @@ export const ItemScreenContext = createContext<ItemOnOrder>({
 const ItemScreen: FC<ItemOnOrder> = item => {
     return (
         <ItemScreenContext.Provider value={item}>
-            <Overview />
-            <Details />
+            <Box sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 2fr"
+            }}>
+                <Overview />
+                <Details />
+            </Box>
         </ItemScreenContext.Provider>
     )
 }

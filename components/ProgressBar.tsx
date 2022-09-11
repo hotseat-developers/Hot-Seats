@@ -10,9 +10,12 @@ import Paper from "@mui/material/Paper"
 import { Typography, IconButton } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { StepTrackerContext } from "../pages/cook"
 import type { Task } from "./Task"
 import supabase from "../lib/supabase"
+import { ItemScreenContext } from './ItemScreen'
 
 type VerticalLinearStepperProps = {
     orderNumber: number
@@ -24,6 +27,7 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
     itemNumber,
 }) => {
     const stepTracker = useContext(StepTrackerContext)
+    const item = useContext(ItemScreenContext)
 
     const [steps, setSteps] = React.useState<Task[]>([])
 
@@ -51,6 +55,7 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
 
     const handleReset = () => {
         setActiveStep(0)
+        stepTracker.updateStep(orderNumber, itemNumber, -item.Item.Task.length)
     }
 
     return (
@@ -68,6 +73,7 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
                                             </Typography>
                                         ) : null
                                     }
+                                    StepIconComponent={step.type === 'PREP' ? MenuBookIcon : WhatshotIcon}
                                 >
                                     {step.name}
                                 </StepLabel>
