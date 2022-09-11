@@ -39,22 +39,9 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
             .then(({ data }) => setSteps(data || []))
     }, [itemNumber])
 
-    const [activeStep, setActiveStep] = React.useState(
-        stepTracker[orderNumber][itemNumber]
-    )
-
-    const handleNext = () => {
-        stepTracker.updateStep(orderNumber, itemNumber, 1)
-        setActiveStep(activeStep + 1)
-    }
-
-    const handleBack = () => {
-        stepTracker.updateStep(orderNumber, itemNumber, -1)
-        setActiveStep(activeStep - 1)
-    }
+    const activeStep = stepTracker[orderNumber][itemNumber]
 
     const handleReset = () => {
-        setActiveStep(0)
         stepTracker.updateStep(orderNumber, itemNumber, -item.Item.Task.length)
     }
 
@@ -77,26 +64,6 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
                                 >
                                     {step.name}
                                 </StepLabel>
-                                <StepContent>
-                                    <Typography>{step.body}</Typography>
-                                    <Box sx={{ mb: 2 }}>
-                                        <div>
-                                            <IconButton
-                                                disabled={index === 0}
-                                                onClick={handleBack}
-                                                sx={{ mt: 1, mr: 1 }}
-                                            >
-                                                <ArrowBackIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={handleNext}
-                                                sx={{ mt: 1, mr: 1 }}
-                                            >
-                                                <ArrowForwardIcon />
-                                            </IconButton>
-                                        </div>
-                                    </Box>
-                                </StepContent>
                             </Step>
                         ))}
                     </Stepper>

@@ -69,10 +69,11 @@ const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
             hidden={value !== index}
             id={`order-tabpanel-${index}`}
             aria-labelledby={`order-tab-${index}`}
+            style={{height: '100%'}}
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3 }}>
+                <Box sx={{ p: 3, height: '100%' }}>
                     {children}
                 </Box>
             )}
@@ -143,8 +144,8 @@ const Cook: NextPage = () => {
                 sx={{
                     display: "grid",
                     gridTemplateColumns: "1fr 2fr",
-                    gridTemplateRows: "1fr 1fr 6fr",
-                    maxHeight: "80vh",
+                    gridTemplateRows: "1fr 6fr",
+                    flexGrow: 1
                 }}
             >
                 <Box

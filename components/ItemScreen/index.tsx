@@ -50,7 +50,8 @@ const ItemScreen: FC<ItemOnOrder> = item => {
         <ItemScreenContext.Provider value={item}>
             <Box sx={{
                 display: "grid",
-                gridTemplateColumns: "1fr 2fr"
+                gridTemplateColumns: "1fr 2fr",
+                height: '99%'
             }}>
                 <Overview />
                 <Details />
