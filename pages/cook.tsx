@@ -9,7 +9,10 @@ import VerticalLinearStepper from "../components/ProgressBar"
 import type { Task } from "../components/Task"
 import formatTime from "../lib/formatting/time"
 import formatOrder from "../lib/formatting/order"
-import ItemScreen from '../components/ItemScreen'
+import ItemScreen from "../components/ItemScreen"
+import Timer from "../components/Timer"
+import { useInterval } from "react-use"
+import { object } from "yup"
 
 type TabPanelProps = {
     children?: React.ReactNode
@@ -69,13 +72,11 @@ const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
             hidden={value !== index}
             id={`order-tabpanel-${index}`}
             aria-labelledby={`order-tab-${index}`}
-            style={{height: '100%'}}
+            style={{ height: "100%" }}
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3, height: '100%' }}>
-                    {children}
-                </Box>
+                <Box sx={{ p: 3, height: "100%" }}>{children}</Box>
             )}
         </div>
     )
@@ -128,16 +129,26 @@ const Cook: NextPage = () => {
         console.log(orders)
     }, [orders])
 
+    useInterval(() => {
+        for (const timerKey of Object.keys(localStorage).filter(item => {
+            const regex = /order-tab-\d-item-\d-timer/
+            const check = item.match(regex)
+            return check
+        })) { localStorage.getItem(timerKey)
+            console.log(localStorage.getItem(timerKey))
+        }
+    }, 5000)
+
     return (
         <StepTrackerContext.Provider
             value={{
                 updateStep(orderId, itemId, step = 1) {
                     setStepTracker(tracker => {
                         tracker[orderId][itemId] += step
-                        return {...tracker}
+                        return { ...tracker }
                     })
                 },
-                ...stepTracker
+                ...stepTracker,
             }}
         >
             <Box
@@ -145,7 +156,7 @@ const Cook: NextPage = () => {
                     display: "grid",
                     gridTemplateColumns: "1fr 2fr",
                     gridTemplateRows: "1fr 6fr",
-                    flexGrow: 1
+                    flexGrow: 1,
                 }}
             >
                 <Box
