@@ -7,6 +7,8 @@ import supabase from "../lib/supabase"
 import BackButton from "../components/BackButton"
 import DeleteButton from "../components/DeleteButton"
 import AddButton from "../components/AddButton"
+import type { Task } from "../components/Task"
+import EditButton from "../components/EditButton"
 
 type Item = {
     name: string
@@ -15,6 +17,8 @@ type Item = {
 
 const Manager: NextPage = () => {
     const [items, setItems] = useState<Item[]>([])
+
+    const [tasks, setTasks] = useState<Task[]>([])
 
     const addItem = (created: Item) => {
         setItems([...items, created])
@@ -29,14 +33,17 @@ const Manager: NextPage = () => {
 
     const deleteItem = async (item: Item) => {
         await supabase.from<Item>("Item").delete().eq("id", item.id)
-
         setItems(items.filter(i => i.id !== item.id))
+    }
+    const editTask = async (task: Task) => {
+        await supabase.from("Task").update({ id: "id" }).eq("id", task.id)
     }
 
     return (
         <>
             <Typography variant="h3">Who are we firing today?</Typography>
             <BackButton />
+
             <NewItem onCreate={addItem} />
             <Box
                 sx={{
@@ -60,6 +67,14 @@ const Manager: NextPage = () => {
                                 {...item}
                                 onClick={() => deleteItem(item)}
                             />
+
+                            <Link href={`/edit/${item.id}`}>
+                                <Button variant="contained" color="warning">
+                                    <Typography variant="button">
+                                        Edit
+                                    </Typography>
+                                </Button>
+                            </Link>
                         </Box>
                     ))}
             </Box>
