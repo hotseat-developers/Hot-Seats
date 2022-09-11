@@ -12,7 +12,12 @@ import { StepTrackerContext } from '../../pages/cook'
 const Details: FC = () => {
     const tracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
-    const task = item.Item.Task[tracker[item.Order.id][item.Item.id]]
+    const activeStep = tracker[item.Order.id][item.Item.id]
+    const task = item.Item.Task[activeStep]
+
+    useEffect(() => {
+        console.log('New active step:', activeStep)
+    }, [activeStep])
 
     const handleNext = () => {
         tracker.updateStep(item.Order.id, item.Item.id, 1)
@@ -40,8 +45,8 @@ const Details: FC = () => {
             )}
 
             <ButtonGroup sx={{ marginTop: 'auto'}} fullWidth>
-                <Button size="large" startIcon={<ArrowBackIosIcon />} variant="contained" onClick={handleNext}>Last Step</Button>
-                <Button size="large" endIcon={<ArrowForwardIosIcon />} variant="contained" onClick={handleBack}>Next Step</Button>
+                <Button size="large" startIcon={<ArrowBackIosIcon />} variant="contained" onClick={handleBack}>Last Step</Button>
+                <Button size="large" endIcon={<ArrowForwardIosIcon />} variant="contained" onClick={handleNext}>Next Step</Button>
             </ButtonGroup>
 
         </Box>
