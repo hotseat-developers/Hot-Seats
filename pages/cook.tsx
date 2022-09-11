@@ -73,7 +73,7 @@ const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
         >
             {value === index && (
                 <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
+                    {children}
                 </Box>
             )}
         </div>
@@ -130,13 +130,13 @@ const Cook: NextPage = () => {
     return (
         <StepTrackerContext.Provider
             value={{
-                ...stepTracker,
                 updateStep(orderId, itemId, step = 1) {
                     setStepTracker(tracker => {
                         tracker[orderId][itemId] += step
-                        return tracker
+                        return {...tracker}
                     })
-                }
+                },
+                ...stepTracker
             }}
         >
             <Box

@@ -6,6 +6,7 @@ import {
     useEffect,
     useState,
     createContext,
+    StrictMode
 } from "react"
 import Head from "next/head"
 import { CacheProvider, EmotionCache } from "@emotion/react"
@@ -83,7 +84,7 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
     }
 
     return (
-        <>
+        <StrictMode>
             <Head>
                 <meta
                     name="description"
@@ -122,7 +123,7 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
                     </CacheProvider>
                 </ToastProvider>
             </AuthContext.Provider>
-        </>
+        </StrictMode>
     )
 }
 

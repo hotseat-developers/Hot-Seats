@@ -6,12 +6,12 @@ import { ItemScreenContext } from '.'
 import { StepTrackerContext } from '../../pages/cook'
 
 const Details: FC = () => {
-    const item = useContext(ItemScreenContext)
     const tracker = useContext(StepTrackerContext)
+    const item = useContext(ItemScreenContext)
 
     return (
         <Box>
-            <Typography variant="h3">{JSON.stringify(item.Item.Task[tracker[item.Order.id][item.Item.id]], null, 2)}</Typography>
+            <Typography variant="body1">{JSON.stringify(item.Item.Task[tracker[item.Order.id][item.Item.id]], null, 2)}</Typography>
 
         </Box>
     )
