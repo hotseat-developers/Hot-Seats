@@ -73,11 +73,7 @@ const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
             {...other}
         >
             {value === index && (
-<<<<<<< HEAD
                 <Box sx={{ p: 3, height: '100%' }}>
-=======
-                <Box sx={{ p: 3 }}>
->>>>>>> f33e7fc (Finished order screen)
                     {children}
                 </Box>
             )}
