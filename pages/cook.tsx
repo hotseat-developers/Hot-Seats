@@ -13,6 +13,8 @@ import ItemScreen from "../components/ItemScreen"
 import Timer from "../components/Timer"
 import { useInterval } from "react-use"
 import { object } from "yup"
+import { useToast } from "use-toast-mui"
+
 
 type TabPanelProps = {
     children?: React.ReactNode
@@ -218,6 +220,7 @@ const Cook: NextPage = () => {
                                             index={i}
                                             value={activeItem}
                                         >
+                                            <Timer/>
                                             <ItemScreen {...item} />
                                         </TabPanel>
                                     ))}

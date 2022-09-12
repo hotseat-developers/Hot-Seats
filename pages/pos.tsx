@@ -38,7 +38,7 @@ const POS: NextPage = () => {
             .from<Order>("Order")
             .insert({})
         if (orderInsertError) {
-            toast.error('An unexpected error has occured.')
+            toast.error('An unexpected error has occurred.')
             throw orderInsertError
         }
         const { error: lineItemsInsertError } = await supabase
@@ -50,7 +50,7 @@ const POS: NextPage = () => {
                 }))
             )
         if (lineItemsInsertError) {
-            toast.error('An unexpected error has occured.')
+            toast.error('An unexpected error has occurred.')
             throw lineItemsInsertError
         } else {
             toast.success(`Order #${insertedOrders[0].id.toString().padStart(3, '0')} submitted successfully!`)
