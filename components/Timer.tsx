@@ -1,7 +1,12 @@
 import React from "react"
 import { useTimer } from "react-timer-hook"
+import type { FC } from "react"
 
-function MyTimer({ expiryTimestamp }) {
+type ExpiryTimestamp ={
+    expiryTimestamp:Date
+}
+
+const Timers: FC<ExpiryTimestamp> = ({expiryTimestamp}) => {
     const {
         seconds,
         minutes,
@@ -46,7 +51,7 @@ export default function Timer() {
     time.setSeconds(time.getSeconds() + 800) // 10 minutes timer
     return (
         <div>
-            <MyTimer expiryTimestamp={time} />
+            <Timers expiryTimestamp={time} />
         </div>
     )
 }
