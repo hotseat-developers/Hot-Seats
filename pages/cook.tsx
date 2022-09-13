@@ -1,5 +1,12 @@
 import type { NextPage } from "next"
-import { Fragment, useEffect, useState, createContext, type FC } from "react"
+import {
+    Fragment,
+    useEffect,
+    useState,
+    createContext,
+    type FC,
+    useContext,
+} from "react"
 import { Typography, Button, Box, Tabs, Tab } from "@mui/material"
 import Link from "next/link"
 import BackButton from "../components/BackButton"
@@ -13,7 +20,8 @@ import ItemScreen from "../components/ItemScreen"
 import Timer from "../components/Timer"
 import { useInterval } from "react-use"
 import { object } from "yup"
-
+import { useToast } from "use-toast-mui"
+import { AudioContext } from "../pages/_app"
 type TabPanelProps = {
     children?: React.ReactNode
     index: number
@@ -89,6 +97,8 @@ const Cook: NextPage = () => {
     const [activeItem, setActiveItem] = useState<number>(0)
     const [stepTracker, setStepTracker] = useState<StepTracker>({})
     const [tabTracker, setTabTracker] = useState<TabTracker>({})
+    const { playAudio } = useContext(AudioContext)
+    const toast = useToast()
     useEffect(() => {
         supabase
             .from<ItemOnOrder>("ItemOnOrder")
@@ -129,15 +139,22 @@ const Cook: NextPage = () => {
         console.log(orders)
     }, [orders])
 
-    useInterval(() => {
-        for (const timerKey of Object.keys(localStorage).filter(item => {
-            const regex = /order-tab-\d-item-\d-timer/
-            const check = item.match(regex)
-            return check
-        })) { localStorage.getItem(timerKey)
-            console.log(localStorage.getItem(timerKey))
+useInterval(() => {
+    for (const timerKey of Object.keys(localStorage).filter(item => {
+        const regex = /timer-\d+-\d+/
+        const check = item.match(regex)
+        return check
+    })) {
+        const [ _, orderNumber ] = timerKey.match(/timer-(\d+)-\d+/)!
+        if (Number(localStorage.getItem(timerKey)) <= Date.now()) {
+            console.log("im here")
+            localStorage.removeItem(timerKey)
+            // setCanContinue(true)
+            playAudio()
+            toast.warning(`Order #${formatOrder(orderNumber)} has item(s) that are ready for the next step.`)
         }
-    }, 5000)
+    }
+}, 1000)
 
     return (
         <StepTrackerContext.Provider

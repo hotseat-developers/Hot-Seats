@@ -2,18 +2,14 @@ import type { AppProps } from "next/app"
 import type { NextPage } from "next"
 import type { Session, User } from "@supabase/supabase-js"
 import { useRouter } from "next/router"
-import {
-    useEffect,
-    useState,
-    createContext,
-    StrictMode
-} from "react"
+import { useEffect, useState, createContext, StrictMode } from "react"
 import Head from "next/head"
 import { CacheProvider, EmotionCache } from "@emotion/react"
-import { ThemeProvider, CssBaseline, createTheme, Box} from "@mui/material"
+import { ThemeProvider, CssBaseline, createTheme, Box } from "@mui/material"
 import { ToastProvider } from "use-toast-mui"
 import supabase from "../lib/supabase"
-import LogoutButton from '../components/LogoutButton'
+import LogoutButton from "../components/LogoutButton"
+import { useAudio } from "react-use"
 
 import "@fontsource/roboto/300.css"
 import "@fontsource/roboto/400.css"
@@ -32,6 +28,14 @@ type AuthContextType = {
     user: Nullable<User>
     signOut: () => Promise<void>
 }
+
+type AudioContextType = {
+    playAudio: () => Promise<void>
+}
+
+export const AudioContext = createContext<AudioContextType>({
+    async playAudio() {},
+})
 
 export const AuthContext = createContext<AuthContextType>({
     // Dummy object if the context is accessed outside a provider
@@ -60,8 +64,11 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
         setSession(session)
         setUser(session?.user ?? null)
 
-        if(!session?.user && !['/', '/login', '/signup'].includes(router.asPath)) {
-            router.push('/login')
+        if (
+            !session?.user &&
+            !["/", "/login", "/signup"].includes(router.asPath)
+        ) {
+            router.push("/login")
         }
 
         const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -82,6 +89,10 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
         await supabase.auth.signOut()
         router.push("/login")
     }
+    const [audio, state, controls, ref] = useAudio({
+        src: "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3",
+        autoPlay: false,
+    })
 
     return (
         <StrictMode>
@@ -117,12 +128,24 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
                     <CacheProvider value={emotionCache}>
                         <ThemeProvider theme={darkTheme}>
                             <CssBaseline />
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                minHeight: '100vh'
-                            }}>
-                                <Component {...pageProps} />
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    minHeight: "100vh",
+                                }}
+                            >
+                                <AudioContext.Provider
+                                    value={{
+                                        async playAudio() {
+                                            controls.seek(0)
+                                            controls.play()
+                                        },
+                                    }}
+                                >
+                                    {audio}
+                                    <Component {...pageProps} />
+                                </AudioContext.Provider>
                                 <LogoutButton />
                             </Box>
                         </ThemeProvider>

@@ -7,18 +7,21 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos"
 import { useTimer } from "react-timer-hook"
 import { useContext, useEffect, useState, type FC } from "react"
 import formatTimer from "../../lib/formatting/timer"
-
+import { useAudio } from "react-use"
 import { ItemScreenContext } from "."
 import { StepTrackerContext } from "../../pages/cook"
+import { useToast } from "use-toast-mui"
 
 const Details: FC = () => {
     const tracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
     const activeStep = tracker[item.Order.id][item.Item.id]
     const task = item.Item.Task[activeStep]
-    const [canContinue, setCanContinue] = useState<boolean>(task && task.type !== "COOK")
+    const [canContinue, setCanContinue] = useState<boolean>(
+        task && task.type !== "COOK"
+    )
     const localStorageKey = `timer-${item.Order.id}-${item.Item.id}`
-
+    const toast = useToast()
     useEffect(() => {
         setCanContinue(task && task.type !== "COOK")
     }, [task])
@@ -27,14 +30,10 @@ const Details: FC = () => {
     const timer = useTimer({
         expiryTimestamp: new Date(expiryEpoch),
         autoStart: expiryEpoch !== 0,
-        onExpire() {
-            localStorage.removeItem(localStorageKey)
-            setCanContinue(true)
-        },
     })
 
     const startTimer = () => {
-        const newExpiry = new Date(Date.now() + (task.cook_time || 0) * 1000)
+        const newExpiry = new Date(Date.now() + ((task.cook_time || 0)* 1000))
         timer.restart(newExpiry)
         localStorage.setItem(localStorageKey, newExpiry.getTime().toString())
     }
@@ -52,7 +51,7 @@ const Details: FC = () => {
             sx={{
                 display: "flex",
                 flexDirection: "column",
-                minhHeight: "100%",
+                minHeight: "100%",
             }}
         >
             {task ? (
