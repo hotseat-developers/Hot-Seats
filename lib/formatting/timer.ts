@@ -20,6 +20,5 @@ export default function formatTimer(value: number | TimerResult) {
         minutes = value.minutes
         seconds = value.seconds
     }
-    console.log(hours, minutes, seconds)
     return `${addPadding(hours)}:${addPadding(minutes)}:${addPadding(seconds)}`
 }

@@ -139,24 +139,43 @@ const Cook: NextPage = () => {
         console.log(orders)
     }, [orders])
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            for (const timerKey of Object.keys(localStorage).filter(item => {
-                const regex = /order-tab-\d-item-\d-timer/
-                const check = item.match(regex)
-                return check
-            })) {
-                if (Number(localStorage.getItem(timerKey)) >= Date.now()) {
-                    console.log("im here")
-                    localStorage.removeItem(timerKey)
-                    // setCanContinue(true)
-                    playAudio()
-                    toast.warning("Your food is ready for the next step!")
-                }
-            }
-        }, 1000)
-        return () => clearInterval(interval)
-    }, [playAudio, toast])
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //         console.log('Interval is running!')
+    //         for (const timerKey of Object.keys(localStorage).filter(item => {
+    //             const regex = /timer-\d-\d/
+    //             const check = item.match(regex)
+    //             return check
+    //         })) {
+    //             console.log(timerKey, localStorage.getItem(timerKey))
+    //             if (Number(localStorage.getItem(timerKey)) <= Date.now()) {
+    //                 console.log("im here")
+    //                 localStorage.removeItem(timerKey)
+    //                 // setCanContinue(true)
+    //                 playAudio()
+    //                 toast.warning("Your food is ready for the next step!")
+    //             }
+    //         }
+    //     }, 1000)
+    //     return () => clearInterval(interval)
+    // }, [playAudio, toast])
+
+useInterval(() => {
+    for (const timerKey of Object.keys(localStorage).filter(item => {
+        const regex = /timer-\d+-\d+/
+        const check = item.match(regex)
+        return check
+    })) {
+        const [ _, orderNumber ] = timerKey.match(/timer-(\d+)-\d+/)!
+        if (Number(localStorage.getItem(timerKey)) <= Date.now()) {
+            console.log("im here")
+            localStorage.removeItem(timerKey)
+            // setCanContinue(true)
+            playAudio()
+            toast.warning(`Order #${formatOrder(orderNumber)} has item(s) that are ready for the next step.`)
+        }
+    }
+}, 1000)
 
     return (
         <StepTrackerContext.Provider
