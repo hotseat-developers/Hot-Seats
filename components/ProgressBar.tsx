@@ -44,11 +44,11 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
 
     const activeStep = stepTracker[orderNumber][itemNumber]
 
-    // useEffect(() => {
-    //     if (loaded && activeStep === steps.length) {
-    //         validator.setCanContinue(orderNumber, itemNumber)
-    //     }
-    // }, [activeStep, itemNumber, loaded, orderNumber, steps.length, validator])
+    useEffect(() => {
+        if (loaded && activeStep === steps.length) {
+            validator.setCanContinue(orderNumber, itemNumber)
+        }
+    }, [activeStep, itemNumber, loaded, orderNumber, steps.length ])
 
     const handleReset = () => {
         stepTracker.updateStep(orderNumber, itemNumber, -item.Item.Task.length)

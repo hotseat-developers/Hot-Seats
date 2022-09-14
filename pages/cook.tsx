@@ -185,6 +185,7 @@ const Cook: NextPage = () => {
             .delete()
             .eq('id', orderId)
 
+        window.alert(JSON.stringify(res, null, 2))
 
         setOrders(tempOrders => {
             delete tempOrders[orderId]
@@ -283,7 +284,10 @@ const Cook: NextPage = () => {
                                             index={i}
                                             value={activeItem}
                                         >
-                                            <ItemScreen complete={() => completeOrder(item.Item.id)} {...item} />
+                                            <ItemScreen complete={async () => {
+                                                completeOrder(item.Order.id)
+                                                console.log('To be deleted', item)
+                                                }} {...item} />
                                         </TabPanel>
                                     ))}
                                 </TabPanel>

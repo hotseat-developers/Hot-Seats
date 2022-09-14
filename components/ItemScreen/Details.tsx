@@ -31,7 +31,7 @@ const Details: FC = () => {
         setCanContinue(task && (task.type !== "COOK" || activeTime))
     }, [task, activeTime])
 
-    const expiryEpoch = Number(localStorage.getItem(localStorageKey)) || 0
+    const expiryEpoch = Number(localStorage.getItem(localStorageKey)) || 1000
     const timer = useTimer({
         expiryTimestamp: new Date(expiryEpoch),
         autoStart: expiryEpoch !== 0,
