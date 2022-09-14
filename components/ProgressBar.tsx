@@ -1,21 +1,19 @@
 import * as React from "react"
-import { useContext, type FC } from "react"
+import { useContext, useEffect, useState, type FC } from "react"
 import Box from "@mui/material/Box"
 import Stepper from "@mui/material/Stepper"
 import Step from "@mui/material/Step"
 import StepLabel from "@mui/material/StepLabel"
-import StepContent from "@mui/material/StepContent"
 import Button from "@mui/material/Button"
 import Paper from "@mui/material/Paper"
-import { Typography, IconButton } from "@mui/material"
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import { Typography } from "@mui/material"
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { StepTrackerContext } from "../pages/cook"
 import type { Task } from "./Task"
 import supabase from "../lib/supabase"
 import { ItemScreenContext } from './ItemScreen'
+import { TimeValidatorContext } from '../pages/cook'
 
 type VerticalLinearStepperProps = {
     orderNumber: number
@@ -28,18 +26,29 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
 }) => {
     const stepTracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
+    const validator = useContext(TimeValidatorContext)
 
-    const [steps, setSteps] = React.useState<Task[]>([])
+    const [steps, setSteps] = useState<Task[]>([])
+    const [ loaded, setLoaded ] = useState<boolean>(false)
 
-    React.useEffect(() => {
+    useEffect(() => {
         supabase
             .from<Task>("Task")
             .select("*")
             .eq("itemId", itemNumber)
-            .then(({ data }) => setSteps(data || []))
+            .then(({ data }) => {
+                setSteps(data || [])
+                setLoaded(true)
+            })
     }, [itemNumber])
 
     const activeStep = stepTracker[orderNumber][itemNumber]
+
+    useEffect(() => {
+        if (loaded && activeStep === steps.length) {
+            validator.setCanContinue(orderNumber, itemNumber)
+        }
+    }, [ activeStep, steps.length, orderNumber, itemNumber, validator, loaded ])
 
     const handleReset = () => {
         stepTracker.updateStep(orderNumber, itemNumber, -item.Item.Task.length)

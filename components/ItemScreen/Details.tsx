@@ -13,13 +13,12 @@ import { StepTrackerContext } from "../../pages/cook"
 import { useToast } from "use-toast-mui"
 import { TimeValidatorContext } from "../../pages/cook"
 
-
 const Details: FC = () => {
     const tracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
-    const timeStamp= useContext(TimeValidatorContext)
+    const timeStamp = useContext(TimeValidatorContext)
     const activeStep = tracker[item.Order.id][item.Item.id]
-    console.log('timeStamp in Details = ', timeStamp)
+    console.log("timeStamp in Details = ", timeStamp)
     const activeTime = timeStamp[item.Order.id][item.Item.id]
     // const activeTime = false
     const task = item.Item.Task[activeStep]
@@ -39,7 +38,7 @@ const Details: FC = () => {
     })
 
     const startTimer = () => {
-        const newExpiry = new Date(Date.now() + ((task.cook_time || 0)* 1000))
+        const newExpiry = new Date(Date.now() + (task.cook_time || 0) * 1000)
         timer.restart(newExpiry)
         localStorage.setItem(localStorageKey, newExpiry.getTime().toString())
     }
@@ -110,7 +109,6 @@ const Details: FC = () => {
                         variant="contained"
                         onClick={handleNext}
                         disabled={!canContinue}
-                        
                     >
                         Next Step
                     </Button>

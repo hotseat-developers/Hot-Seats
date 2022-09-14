@@ -63,8 +63,7 @@ type ItemOnOrder = {
 type TimerValidatorType = {
     setCanContinue: (
         orderId: number,
-        itemId: number,
-        step: number
+        itemId: number
     ) => void
 } & TimeTracker
 
@@ -261,6 +260,7 @@ const Cook: NextPage = () => {
                                                 key={`order-tab-${orderNum}-item-${item.Item.id}`}
                                                 label={item.Item.name}
                                                 value={i}
+                                                disabled={timeTracker[Number(orderNum)][item.Item.id]}
                                             />
                                         ))}
                                     </Tabs>
