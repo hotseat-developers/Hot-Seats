@@ -22,6 +22,7 @@ import { useInterval } from "react-use"
 import { object } from "yup"
 import { useToast } from "use-toast-mui"
 import { AudioContext } from "../pages/_app"
+import { create } from "@mui/material/styles/createTransitions"
 type TabPanelProps = {
     children?: React.ReactNode
     index: number
@@ -59,6 +60,16 @@ type ItemOnOrder = {
     }
 }
 
+type TimerValidatorType = {
+    setCanContinue: (
+        orderId: number,
+        itemId: number,
+        step: number
+    ) => void
+} & TimeTracker
+
+type TimeTracker = Record<number, Record<number, boolean>>
+
 type Order = Record<number, ItemOnOrder[]>
 
 type StepTracker = Record<number, Record<number, number>>
@@ -73,19 +84,23 @@ export const StepTrackerContext = createContext<StepTrackerProvider>({
     },
 })
 
+export const TimeValidatorContext = createContext<TimerValidatorType>({
+    async setCanContinue() {},
+})
+
 const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
     return (
         <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`order-tabpanel-${index}`}
-            aria-labelledby={`order-tab-${index}`}
-            style={{ height: "100%" }}
-            {...other}
+        role="tabpanel"
+        hidden={value !== index}
+        id={`order-tabpanel-${index}`}
+        aria-labelledby={`order-tab-${index}`}
+        style={{ height: "100%" }}
+        {...other}
         >
             {value === index && (
                 <Box sx={{ p: 3, height: "100%" }}>{children}</Box>
-            )}
+                )}
         </div>
     )
 }
@@ -97,25 +112,24 @@ const Cook: NextPage = () => {
     const [activeItem, setActiveItem] = useState<number>(0)
     const [stepTracker, setStepTracker] = useState<StepTracker>({})
     const [tabTracker, setTabTracker] = useState<TabTracker>({})
+    const [timeTracker, setTimeTracker] = useState<TimeTracker>({})
     const { playAudio } = useContext(AudioContext)
     const toast = useToast()
     useEffect(() => {
         supabase
-            .from<ItemOnOrder>("ItemOnOrder")
-            .select("Item(*, Task(*)),Order(*)")
-            .then(({ data }) => {
-                console.log("Data is", data)
-                setActiveOrder(Math.min(...(data?.map(d => d.Order.id) || [0])))
-                setOrders(
-                    data?.reduce<Order>((collector, row) => {
-                        if (row.Order.id in collector) {
-                            collector[row.Order.id].push(row)
-                        } else {
-                            collector[row.Order.id] = [row]
-                        }
-                        return collector
-                    }, {}) || []
-                )
+        .from<ItemOnOrder>("ItemOnOrder")
+        .select("Item(*, Task(*)),Order(*)")
+        .then(({ data }) => {
+            setActiveOrder(Math.min(...(data?.map(d => d.Order.id) || [0])))
+            const newOrders = data?.reduce<Order>((collector, row) => {
+                if (row.Order.id in collector) {
+                    collector[row.Order.id].push(row)
+                } else {
+                    collector[row.Order.id] = [row]
+                }
+                return collector
+            }, {}) || []
+            setOrders(newOrders)
                 setStepTracker(
                     data?.reduce<StepTracker>((collector, row) => {
                         if (row.Order.id in collector) {
@@ -125,36 +139,46 @@ const Cook: NextPage = () => {
                         }
                         return collector
                     }, {}) || {}
-                )
+                    )
                 setTabTracker(
                     data?.reduce<TabTracker>((collector, row) => {
                         collector[row.Order.id] = 0
                         return collector
                     }, {}) || {}
-                )
+                    )
+                console.log("newOrders", newOrders)
+                const newTimeTracker = Object.fromEntries(
+                    Object.entries(newOrders).map(([ orderId, order ]) => {
+                        return [ orderId, Object.fromEntries(order.map(({ Item }) => [Item.id, false]))]
+                    }))
+                console.log('Time tracker to be set to:', newTimeTracker)
+                setTimeTracker(newTimeTracker)
             })
     }, [])
 
-    useEffect(() => {
-        console.log(orders)
-    }, [orders])
-
-useInterval(() => {
-    for (const timerKey of Object.keys(localStorage).filter(item => {
-        const regex = /timer-\d+-\d+/
-        const check = item.match(regex)
-        return check
-    })) {
-        const [ _, orderNumber ] = timerKey.match(/timer-(\d+)-\d+/)!
-        if (Number(localStorage.getItem(timerKey)) <= Date.now()) {
-            console.log("im here")
-            localStorage.removeItem(timerKey)
-            // setCanContinue(true)
-            playAudio()
-            toast.warning(`Order #${formatOrder(orderNumber)} has item(s) that are ready for the next step.`)
+    useInterval(() => {
+        for (const timerKey of Object.keys(localStorage).filter(item => {
+            const regex = /timer-\d+-\d+/
+            const check = item.match(regex)
+            return check
+        })) {
+            const [_, orderNumber, itemNumber] = timerKey.match(/timer-(\d+)-(\d+)/)!
+            if (Number(localStorage.getItem(timerKey)) <= Date.now()) {
+                localStorage.removeItem(timerKey)
+                // setCanContinue(true)
+                setTimeTracker(tracker => {
+                    tracker[Number(orderNumber)][Number(itemNumber)] = true
+                    return { ...tracker }
+                })
+                playAudio()
+                toast.warning(
+                    `Order #${formatOrder(
+                        orderNumber
+                    )} has item(s) that are ready for the next step.`
+                )
+            }
         }
-    }
-}, 1000)
+    }, 1000)
 
     return (
         <StepTrackerContext.Provider
@@ -168,6 +192,17 @@ useInterval(() => {
                 ...stepTracker,
             }}
         >
+            <TimeValidatorContext.Provider
+                value={{
+                        setCanContinue(orderId, itemId) {
+                        setTimeTracker(tracker => {
+                            tracker[orderId][itemId] = true
+                            return { ...tracker }
+                        })
+                    },
+                    ...timeTracker,
+                }}
+            >
             <Box
                 sx={{
                     display: "grid",
@@ -199,7 +234,7 @@ useInterval(() => {
                     </Tabs>
                 </Box>
                 <Box sx={{ gridColumn: "span 2" }}>
-                    {orders &&
+                    {orders && timeTracker &&
                         Object.entries(orders).map(([orderNum, items]) => (
                             <Fragment key={orderNum}>
                                 <TabPanel
@@ -244,6 +279,7 @@ useInterval(() => {
                 </Box>
             </Box>
             <BackButton />
+            </TimeValidatorContext.Provider>
         </StepTrackerContext.Provider>
     )
 }
