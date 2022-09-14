@@ -179,6 +179,19 @@ const Cook: NextPage = () => {
         }
     }, 1000)
 
+    const completeOrder = async (orderId: number) => {
+        const res = await supabase
+            .from('Order')
+            .delete()
+            .eq('id', orderId)
+
+
+        setOrders(tempOrders => {
+            delete tempOrders[orderId]
+            return { ...tempOrders }
+        })
+    }
+
     return (
         <StepTrackerContext.Provider
             value={{
@@ -270,7 +283,7 @@ const Cook: NextPage = () => {
                                             index={i}
                                             value={activeItem}
                                         >
-                                            <ItemScreen {...item} />
+                                            <ItemScreen complete={() => completeOrder(item.Item.id)} {...item} />
                                         </TabPanel>
                                     ))}
                                 </TabPanel>

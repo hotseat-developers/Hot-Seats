@@ -12,13 +12,13 @@ import { ItemScreenContext } from "."
 import { StepTrackerContext } from "../../pages/cook"
 import { useToast } from "use-toast-mui"
 import { TimeValidatorContext } from "../../pages/cook"
+import supabase from '../../lib/supabase'
 
 const Details: FC = () => {
     const tracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
     const timeStamp = useContext(TimeValidatorContext)
     const activeStep = tracker[item.Order.id][item.Item.id]
-    console.log("timeStamp in Details = ", timeStamp)
     const activeTime = timeStamp[item.Order.id][item.Item.id]
     // const activeTime = false
     const task = item.Item.Task[activeStep]
@@ -111,6 +111,16 @@ const Details: FC = () => {
                         disabled={!canContinue}
                     >
                         Next Step
+                    </Button>
+                )}
+                {Object.values(timeStamp[item.Order.id]).every(Boolean) && (
+                    <Button
+                        size="large"
+                        endIcon={<ArrowForwardIosIcon />}
+                        variant="contained"
+                        onClick={item.complete}
+                    >
+                        Complete Order
                     </Button>
                 )}
             </ButtonGroup>

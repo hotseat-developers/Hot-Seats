@@ -6,6 +6,7 @@ import Overview from "./Overview"
 import Timer from "../Timer"
 
 type ItemOnOrder = {
+    complete: () => Promise<void>
     Item: { id: number; name: string } & {
         Task: {
             id: number
@@ -26,6 +27,7 @@ type ItemOnOrder = {
 }
 
 export const ItemScreenContext = createContext<ItemOnOrder>({
+    async complete() {},
     Item: {
         id: 0,
         name: "Example Item",
