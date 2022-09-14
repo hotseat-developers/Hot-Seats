@@ -12,6 +12,16 @@ all food comes out synchronized and correctly cooked. It will feature a custom d
 managing your menu and prep instructions. Additionally it will feature the prep stations that
 receive orders in real time and guide the staff on how to prep and cook the meal.
 
+## User Stories
+- As a user I want to be able to sign in to the page with authentication
+- As a user I want to be able to log into the page after signing up
+- As a user I want to be able to pick what role I am assigned to
+- As a user I want to be able to create tasks for the cooks to see
+- As a user I want to be able to create orders in the point of sale screen to send to the cooks
+- As a user I want to be able to see the cook screen with orders on it telling me how to prepare and cook the food
+- As a user I want to be able to delete orders and see the timers required to prep and cook the food
+
+
 ## Technologies used
 
 - Next.js (Full stack)
@@ -30,6 +40,7 @@ receive orders in real time and guide the staff on how to prep and cook the meal
 - [x] Allow users to create and tasks when they are in the manager role
 - [x] Allow users to create orders and wipe them clean when not needed when they are in the point of sale role
 - [x] Allow users to view orders and go through the steps when cooking the order when they are in the cook role
+- [x] Allow users to track their progress with their orders
 
 ## Stretch Goals
 - [] Sync timers for all food tasks
