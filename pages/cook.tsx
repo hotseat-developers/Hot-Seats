@@ -180,17 +180,16 @@ const Cook: NextPage = () => {
     }, 1000)
 
     const completeOrder = async (orderId: number) => {
-        const res = await supabase
+        await supabase
             .from('Order')
             .delete()
             .eq('id', orderId)
-
-        window.alert(JSON.stringify(res, null, 2))
 
         setOrders(tempOrders => {
             delete tempOrders[orderId]
             return { ...tempOrders }
         })
+        setActiveOrder(Math.min(...(Object.keys(orders).map(Number))))
     }
 
     return (
