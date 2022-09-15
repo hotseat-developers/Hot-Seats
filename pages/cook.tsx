@@ -34,6 +34,11 @@ type Item = {
     name: string
 }
 
+type DBOrder = {
+    id: number
+    time: string
+}
+
 type TabTracker = Record<number, number>
 
 type TabTrackerProvider = {
@@ -61,10 +66,7 @@ type ItemOnOrder = {
 }
 
 type TimerValidatorType = {
-    setCanContinue: (
-        orderId: number,
-        itemId: number
-    ) => void
+    setCanContinue: (orderId: number, itemId: number) => void
 } & TimeTracker
 
 type TimeTracker = Record<number, Record<number, boolean>>
@@ -90,16 +92,16 @@ export const TimeValidatorContext = createContext<TimerValidatorType>({
 const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => {
     return (
         <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`order-tabpanel-${index}`}
-        aria-labelledby={`order-tab-${index}`}
-        style={{ height: "100%" }}
-        {...other}
+            role="tabpanel"
+            hidden={value !== index}
+            id={`order-tabpanel-${index}`}
+            aria-labelledby={`order-tab-${index}`}
+            style={{ height: "100%" }}
+            {...other}
         >
             {value === index && (
                 <Box sx={{ p: 3, height: "100%" }}>{children}</Box>
-                )}
+            )}
         </div>
     )
 }
@@ -117,19 +119,20 @@ const Cook: NextPage = () => {
     const toast = useToast()
     useEffect(() => {
         supabase
-        .from<ItemOnOrder>("ItemOnOrder")
-        .select("Item(*, Task(*)),Order(*)")
-        .then(({ data }) => {
-            setActiveOrder(Math.min(...(data?.map(d => d.Order.id) || [0])))
-            const newOrders = data?.reduce<Order>((collector, row) => {
-                if (row.Order.id in collector) {
-                    collector[row.Order.id].push(row)
-                } else {
-                    collector[row.Order.id] = [row]
-                }
-                return collector
-            }, {}) || []
-            setOrders(newOrders)
+            .from<ItemOnOrder>("ItemOnOrder")
+            .select("Item(*, Task(*)),Order(*)")
+            .then(({ data }) => {
+                setActiveOrder(Math.min(...(data?.map(d => d.Order.id) || [0])))
+                const newOrders =
+                    data?.reduce<Order>((collector, row) => {
+                        if (row.Order.id in collector) {
+                            collector[row.Order.id].push(row)
+                        } else {
+                            collector[row.Order.id] = [row]
+                        }
+                        return collector
+                    }, {}) || []
+                setOrders(newOrders)
                 setStepTracker(
                     data?.reduce<StepTracker>((collector, row) => {
                         if (row.Order.id in collector) {
@@ -139,21 +142,68 @@ const Cook: NextPage = () => {
                         }
                         return collector
                     }, {}) || {}
-                    )
+                )
                 setTabTracker(
                     data?.reduce<TabTracker>((collector, row) => {
                         collector[row.Order.id] = 0
                         return collector
                     }, {}) || {}
-                    )
+                )
                 console.log("newOrders", newOrders)
                 const newTimeTracker = Object.fromEntries(
-                    Object.entries(newOrders).map(([ orderId, order ]) => {
-                        return [ orderId, Object.fromEntries(order.map(({ Item }) => [Item.id, false]))]
-                    }))
-                console.log('Time tracker to be set to:', newTimeTracker)
+                    Object.entries(newOrders).map(([orderId, order]) => {
+                        return [
+                            orderId,
+                            Object.fromEntries(
+                                order.map(({ Item }) => [Item.id, false])
+                            ),
+                        ]
+                    })
+                )
+                console.log("Time tracker to be set to:", newTimeTracker)
                 setTimeTracker(newTimeTracker)
             })
+    }, [])
+
+    useEffect(() => {
+        const newOrderListener = supabase
+            .from("Order")
+            .on("INSERT", async payload => {
+                const { data } = await supabase
+                    .from<ItemOnOrder>("ItemOnOrder")
+                    .select("Order!inner(*),Item(*, Task(*))")
+                    // @ts-ignore
+                    .eq("Order.id", payload.new.id)
+
+                setOrders({
+                    [data![0].Order.id]: data!,
+                    ...orders,
+                })
+
+                setStepTracker({
+                    [data![0].Order.id]: Object.fromEntries(
+                        data?.map(row => [row.Item.id, 0])!
+                    ),
+                    ...stepTracker,
+                })
+
+                setTabTracker({
+                    [data![0].Order.id]: 0,
+                    ...tabTracker,
+                })
+
+                setTimeTracker({
+                    [data![0].Order.id]: Object.fromEntries(
+                        data!.map(({ Item }) => [Item.id, false])
+                    ),
+                })
+            })
+            .subscribe()
+
+        console.log(newOrderListener)
+        return () => {
+            newOrderListener.unsubscribe()
+        }
     }, [])
 
     useInterval(() => {
@@ -162,7 +212,8 @@ const Cook: NextPage = () => {
             const check = item.match(regex)
             return check
         })) {
-            const [_, orderNumber, itemNumber] = timerKey.match(/timer-(\d+)-(\d+)/)!
+            const [_, orderNumber, itemNumber] =
+                timerKey.match(/timer-(\d+)-(\d+)/)!
             if (Number(localStorage.getItem(timerKey)) <= Date.now()) {
                 localStorage.removeItem(timerKey)
                 // setCanContinue(true)
@@ -181,16 +232,13 @@ const Cook: NextPage = () => {
     }, 1000)
 
     const completeOrder = async (orderId: number) => {
-        await supabase
-            .from('Order')
-            .delete()
-            .eq('id', orderId)
+        await supabase.from("Order").delete().eq("id", orderId)
 
         setOrders(tempOrders => {
             delete tempOrders[orderId]
             return { ...tempOrders }
         })
-        setActiveOrder(Math.min(...(Object.keys(orders).map(Number))))
+        setActiveOrder(Math.min(...Object.keys(orders).map(Number)))
         playDing()
         toast.success(`Order #${formatOrder(orderId)} closed successfully!`)
     }
@@ -209,7 +257,7 @@ const Cook: NextPage = () => {
         >
             <TimeValidatorContext.Provider
                 value={{
-                        setCanContinue(orderId, itemId) {
+                    setCanContinue(orderId, itemId) {
                         setTimeTracker(tracker => {
                             tracker[orderId][itemId] = true
                             return { ...tracker }
@@ -218,86 +266,99 @@ const Cook: NextPage = () => {
                     ...timeTracker,
                 }}
             >
-            <Box
-                sx={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 2fr",
-                    gridTemplateRows: "1fr 6fr",
-                    flexGrow: 1,
-                }}
-            >
                 <Box
                     sx={{
-                        gridColumn: "span 2",
+                        display: "grid",
+                        gridTemplateColumns: "1fr 2fr",
+                        gridTemplateRows: "1fr 6fr",
+                        flexGrow: 1,
                     }}
                 >
-                    <Tabs
-                        value={activeOrder}
-                        onChange={(_e, newValue) => {
-                            setActiveOrder(newValue)
-                            setActiveItem(tabTracker[newValue])
+                    <Box
+                        sx={{
+                            gridColumn: "span 2",
                         }}
                     >
+                        <Tabs
+                            value={activeOrder}
+                            onChange={(_e, newValue) => {
+                                setActiveOrder(newValue)
+                                setActiveItem(tabTracker[newValue])
+                            }}
+                        >
+                            {orders &&
+                                Object.keys(orders).map(orderNum => (
+                                    <Tab
+                                        key={`order-tab-${orderNum}`}
+                                        label={`#${formatOrder(orderNum)}`}
+                                        value={Number(orderNum)}
+                                    />
+                                ))}
+                        </Tabs>
+                    </Box>
+                    <Box sx={{ gridColumn: "span 2" }}>
                         {orders &&
-                            Object.keys(orders).map(orderNum => (
-                                <Tab
-                                    key={`order-tab-${orderNum}`}
-                                    label={`#${formatOrder(orderNum)}`}
-                                    value={Number(orderNum)}
-                                />
-                            ))}
-                    </Tabs>
-                </Box>
-                <Box sx={{ gridColumn: "span 2" }}>
-                    {orders && timeTracker &&
-                        Object.entries(orders).map(([orderNum, items]) => (
-                            <Fragment key={orderNum}>
-                                <TabPanel
-                                    value={activeOrder}
-                                    index={Number(orderNum)}
-                                    key={`order-tabpanel-${orderNum}`}
-                                >
-                                    <Tabs
-                                        value={activeItem}
-                                        onChange={(_e, newValue) => {
-                                            setTabTracker(tracker => {
-                                                tracker[Number(orderNum)] =
-                                                    newValue
-                                                return tracker
-                                                // Access current active tab from `tracker` and change it
-                                                // tracker[someKey] = newValue
-                                                // return the updated object
-                                            })
-                                            setActiveItem(newValue)
-                                        }}
+                            timeTracker &&
+                            Object.entries(orders).map(([orderNum, items]) => (
+                                <Fragment key={orderNum}>
+                                    <TabPanel
+                                        value={activeOrder}
+                                        index={Number(orderNum)}
+                                        key={`order-tabpanel-${orderNum}`}
                                     >
-                                        {items.map((item, i) => (
-                                            <Tab
-                                                key={`order-tab-${orderNum}-item-${item.Item.id}`}
-                                                label={item.Item.name}
-                                                value={i}
-                                                disabled={timeTracker[Number(orderNum)][item.Item.id]}
-                                            />
-                                        ))}
-                                    </Tabs>
-                                    {items.map((item, i) => (
-                                        <TabPanel
-                                            key={`order-tab-${orderNum}-item-${item.Item.id}-panel`}
-                                            index={i}
+                                        <Tabs
                                             value={activeItem}
+                                            onChange={(_e, newValue) => {
+                                                setTabTracker(tracker => {
+                                                    tracker[Number(orderNum)] =
+                                                        newValue
+                                                    return tracker
+                                                    // Access current active tab from `tracker` and change it
+                                                    // tracker[someKey] = newValue
+                                                    // return the updated object
+                                                })
+                                                setActiveItem(newValue)
+                                            }}
                                         >
-                                            <ItemScreen complete={async () => {
-                                                completeOrder(item.Order.id)
-                                                console.log('To be deleted', item)
-                                                }} {...item} />
-                                        </TabPanel>
-                                    ))}
-                                </TabPanel>
-                            </Fragment>
-                        ))}
+                                            {items.map((item, i) => (
+                                                <Tab
+                                                    key={`order-tab-${orderNum}-item-${item.Item.id}`}
+                                                    label={item.Item.name}
+                                                    value={i}
+                                                    disabled={
+                                                        timeTracker[
+                                                            Number(orderNum)
+                                                        ][item.Item.id]
+                                                    }
+                                                />
+                                            ))}
+                                        </Tabs>
+                                        {items.map((item, i) => (
+                                            <TabPanel
+                                                key={`order-tab-${orderNum}-item-${item.Item.id}-panel`}
+                                                index={i}
+                                                value={activeItem}
+                                            >
+                                                <ItemScreen
+                                                    complete={async () => {
+                                                        completeOrder(
+                                                            item.Order.id
+                                                        )
+                                                        console.log(
+                                                            "To be deleted",
+                                                            item
+                                                        )
+                                                    }}
+                                                    {...item}
+                                                />
+                                            </TabPanel>
+                                        ))}
+                                    </TabPanel>
+                                </Fragment>
+                            ))}
+                    </Box>
                 </Box>
-            </Box>
-            <BackButton />
+                <BackButton />
             </TimeValidatorContext.Provider>
         </StepTrackerContext.Provider>
     )
