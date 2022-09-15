@@ -21,7 +21,7 @@ import Timer from "../components/Timer"
 import { useInterval } from "react-use"
 import { object } from "yup"
 import { useToast } from "use-toast-mui"
-import { AudioContext } from "../pages/_app"
+import { BuzzerAudioContext, DingAudioContext } from "../pages/_app"
 import { create } from "@mui/material/styles/createTransitions"
 type TabPanelProps = {
     children?: React.ReactNode
@@ -112,7 +112,8 @@ const Cook: NextPage = () => {
     const [stepTracker, setStepTracker] = useState<StepTracker>({})
     const [tabTracker, setTabTracker] = useState<TabTracker>({})
     const [timeTracker, setTimeTracker] = useState<TimeTracker>({})
-    const { playAudio } = useContext(AudioContext)
+    const { playAudio: playBuzzer } = useContext(BuzzerAudioContext)
+    const { playAudio: playDing } = useContext(DingAudioContext)
     const toast = useToast()
     useEffect(() => {
         supabase
@@ -169,7 +170,7 @@ const Cook: NextPage = () => {
                     tracker[Number(orderNumber)][Number(itemNumber)] = true
                     return { ...tracker }
                 })
-                playAudio()
+                playBuzzer()
                 toast.warning(
                     `Order #${formatOrder(
                         orderNumber
@@ -190,6 +191,8 @@ const Cook: NextPage = () => {
             return { ...tempOrders }
         })
         setActiveOrder(Math.min(...(Object.keys(orders).map(Number))))
+        playDing()
+        toast.success(`Order #${formatOrder(orderId)} closed successfully!`)
     }
 
     return (

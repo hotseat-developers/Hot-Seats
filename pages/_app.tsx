@@ -33,8 +33,12 @@ type AudioContextType = {
     playAudio: () => Promise<void>
 }
 
-export const AudioContext = createContext<AudioContextType>({
+export const BuzzerAudioContext = createContext<AudioContextType>({
     async playAudio() {},
+})
+
+export const DingAudioContext = createContext<AudioContextType>({
+    async playAudio() {}
 })
 
 export const AuthContext = createContext<AuthContextType>({
@@ -89,8 +93,13 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
         await supabase.auth.signOut()
         router.push("/login")
     }
-    const [audio, state, controls, ref] = useAudio({
+    const [buzzerAudio,, buzzerControls] = useAudio({
         src: "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3",
+        autoPlay: false,
+    })
+
+    const [dingAudio,, dingControls] = useAudio({
+        src: "https://www.myinstants.com/media/sounds/zapsplat_bell_service_disk_ring_slightly_broken_resonate_18042.mp3",
         autoPlay: false,
     })
 
@@ -135,17 +144,25 @@ const App: NextPage<MyAppProps> = ({ Component, pageProps }) => {
                                     minHeight: "100vh",
                                 }}
                             >
-                                <AudioContext.Provider
+                                <BuzzerAudioContext.Provider
                                     value={{
                                         async playAudio() {
-                                            controls.seek(0)
-                                            controls.play()
+                                            buzzerControls.seek(0)
+                                            buzzerControls.play()
                                         },
                                     }}
                                 >
-                                    {audio}
-                                    <Component {...pageProps} />
-                                </AudioContext.Provider>
+                                    {buzzerAudio}
+                                    <DingAudioContext.Provider value={{
+                                        async playAudio() {
+                                            dingControls.seek(0)
+                                            dingControls.play()
+                                        }
+                                    }}>
+                                        {dingAudio}
+                                        <Component {...pageProps} />
+                                    </DingAudioContext.Provider>
+                                </BuzzerAudioContext.Provider>
                                 <LogoutButton />
                             </Box>
                         </ThemeProvider>
