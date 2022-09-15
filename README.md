@@ -21,6 +21,11 @@ receive orders in real time and guide the staff on how to prep and cook the meal
 - As a user I want to be able to see the cook screen with orders on it telling me how to prepare and cook the food
 - As a user I want to be able to delete orders and see the timers required to prep and cook the food
 
+## Instructions
+- User must run the command npm install
+- User must set up their env file
+- User must run command npm run dev
+- To set up Supabase follow the documentation. Set up the supabase CLI. You can set up organizations with different team members with different access to the database. You can set up your tables here as well. For further documentation please visit https://supabase.com/docs for more information.
 
 ## Technologies used
 
