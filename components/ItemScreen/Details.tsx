@@ -12,14 +12,13 @@ import { ItemScreenContext } from "."
 import { StepTrackerContext } from "../../pages/cook"
 import { useToast } from "use-toast-mui"
 import { TimeValidatorContext } from "../../pages/cook"
-
+import supabase from '../../lib/supabase'
 
 const Details: FC = () => {
     const tracker = useContext(StepTrackerContext)
     const item = useContext(ItemScreenContext)
-    const timeStamp= useContext(TimeValidatorContext)
+    const timeStamp = useContext(TimeValidatorContext)
     const activeStep = tracker[item.Order.id][item.Item.id]
-    console.log('timeStamp in Details = ', timeStamp)
     const activeTime = timeStamp[item.Order.id][item.Item.id]
     // const activeTime = false
     const task = item.Item.Task[activeStep]
@@ -32,14 +31,14 @@ const Details: FC = () => {
         setCanContinue(task && (task.type !== "COOK" || activeTime))
     }, [task, activeTime])
 
-    const expiryEpoch = Number(localStorage.getItem(localStorageKey)) || 0
+    const expiryEpoch = Number(localStorage.getItem(localStorageKey)) || 1000
     const timer = useTimer({
         expiryTimestamp: new Date(expiryEpoch),
         autoStart: expiryEpoch !== 0,
     })
 
     const startTimer = () => {
-        const newExpiry = new Date(Date.now() + ((task.cook_time || 0)* 1000))
+        const newExpiry = new Date(Date.now() + (task.cook_time || 0) * 1000)
         timer.restart(newExpiry)
         localStorage.setItem(localStorageKey, newExpiry.getTime().toString())
     }
@@ -110,9 +109,18 @@ const Details: FC = () => {
                         variant="contained"
                         onClick={handleNext}
                         disabled={!canContinue}
-                        
                     >
                         Next Step
+                    </Button>
+                )}
+                {Object.values(timeStamp[item.Order.id]).every(Boolean) && (
+                    <Button
+                        size="large"
+                        endIcon={<ArrowForwardIosIcon />}
+                        variant="contained"
+                        onClick={item.complete}
+                    >
+                        Complete Order
                     </Button>
                 )}
             </ButtonGroup>

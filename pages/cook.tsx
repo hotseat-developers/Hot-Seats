@@ -21,7 +21,7 @@ import Timer from "../components/Timer"
 import { useInterval } from "react-use"
 import { object } from "yup"
 import { useToast } from "use-toast-mui"
-import { AudioContext } from "../pages/_app"
+import { BuzzerAudioContext, DingAudioContext } from "../pages/_app"
 import { create } from "@mui/material/styles/createTransitions"
 type TabPanelProps = {
     children?: React.ReactNode
@@ -63,8 +63,7 @@ type ItemOnOrder = {
 type TimerValidatorType = {
     setCanContinue: (
         orderId: number,
-        itemId: number,
-        step: number
+        itemId: number
     ) => void
 } & TimeTracker
 
@@ -113,7 +112,8 @@ const Cook: NextPage = () => {
     const [stepTracker, setStepTracker] = useState<StepTracker>({})
     const [tabTracker, setTabTracker] = useState<TabTracker>({})
     const [timeTracker, setTimeTracker] = useState<TimeTracker>({})
-    const { playAudio } = useContext(AudioContext)
+    const { playAudio: playBuzzer } = useContext(BuzzerAudioContext)
+    const { playAudio: playDing } = useContext(DingAudioContext)
     const toast = useToast()
     useEffect(() => {
         supabase
@@ -170,7 +170,7 @@ const Cook: NextPage = () => {
                     tracker[Number(orderNumber)][Number(itemNumber)] = true
                     return { ...tracker }
                 })
-                playAudio()
+                playBuzzer()
                 toast.warning(
                     `Order #${formatOrder(
                         orderNumber
@@ -179,6 +179,21 @@ const Cook: NextPage = () => {
             }
         }
     }, 1000)
+
+    const completeOrder = async (orderId: number) => {
+        await supabase
+            .from('Order')
+            .delete()
+            .eq('id', orderId)
+
+        setOrders(tempOrders => {
+            delete tempOrders[orderId]
+            return { ...tempOrders }
+        })
+        setActiveOrder(Math.min(...(Object.keys(orders).map(Number))))
+        playDing()
+        toast.success(`Order #${formatOrder(orderId)} closed successfully!`)
+    }
 
     return (
         <StepTrackerContext.Provider
@@ -261,6 +276,7 @@ const Cook: NextPage = () => {
                                                 key={`order-tab-${orderNum}-item-${item.Item.id}`}
                                                 label={item.Item.name}
                                                 value={i}
+                                                disabled={timeTracker[Number(orderNum)][item.Item.id]}
                                             />
                                         ))}
                                     </Tabs>
@@ -270,7 +286,10 @@ const Cook: NextPage = () => {
                                             index={i}
                                             value={activeItem}
                                         >
-                                            <ItemScreen {...item} />
+                                            <ItemScreen complete={async () => {
+                                                completeOrder(item.Order.id)
+                                                console.log('To be deleted', item)
+                                                }} {...item} />
                                         </TabPanel>
                                     ))}
                                 </TabPanel>
