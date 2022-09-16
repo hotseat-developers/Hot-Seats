@@ -35,6 +35,7 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
         supabase
             .from<Task>("Task")
             .select("*")
+            .order("task_number")
             .eq("itemId", itemNumber)
             .then(({ data }) => {
                 setSteps(data || [])

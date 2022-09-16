@@ -62,6 +62,7 @@ const Details: FC = () => {
             {task ? (
                 <>
                     <Typography variant="h4">{task.name}</Typography>
+                    <Typography variant="h4">{task.temperature}F°</Typography>
                     <Typography variant="body1">{task.body}</Typography>
                     {task.type === "COOK" && (
                         <>
