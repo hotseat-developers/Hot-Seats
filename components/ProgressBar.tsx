@@ -6,6 +6,7 @@ import Step from "@mui/material/Step"
 import StepLabel from "@mui/material/StepLabel"
 import Button from "@mui/material/Button"
 import Paper from "@mui/material/Paper"
+
 import { Typography } from "@mui/material"
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
@@ -35,6 +36,7 @@ const VerticalLinearStepper: FC<VerticalLinearStepperProps> = ({
         supabase
             .from<Task>("Task")
             .select("*")
+            .order("task_number")
             .eq("itemId", itemNumber)
             .then(({ data }) => {
                 setSteps(data || [])

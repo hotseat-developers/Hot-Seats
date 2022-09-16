@@ -143,9 +143,9 @@ const EditPage: FC<EditTaskProps> = ({ item, tasker }) => {
             </div>
 )}
 
-            <Button variant="contained">
+            <Button variant="contained"onClick={() => Router.back()}>
                 <Typography variant="button">
-                    <div onClick={() => Router.back()}>Go Back</div>
+                    Go Back
                 </Typography>
             </Button>
         </>

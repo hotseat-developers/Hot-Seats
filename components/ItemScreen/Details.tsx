@@ -4,6 +4,7 @@ import Button from "@mui/material/Button"
 import ButtonGroup from "@mui/material/ButtonGroup"
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos"
+import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import { useTimer } from "react-timer-hook"
 import { useContext, useEffect, useState, type FC } from "react"
 import formatTimer from "../../lib/formatting/timer"
@@ -62,6 +63,7 @@ const Details: FC = () => {
             {task ? (
                 <>
                     <Typography variant="h4">{task.name}</Typography>
+                    <Typography variant="h4"><DeviceThermostatIcon/>{task.temperature}F°</Typography>
                     <Typography variant="body1">{task.body}</Typography>
                     {task.type === "COOK" && (
                         <>
