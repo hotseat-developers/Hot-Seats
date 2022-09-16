@@ -65,7 +65,7 @@ const EditPage: FC<EditTaskProps> = ({ item, tasker }) => {
 
     return (
         <>
-            <Typography variant="h1">{item.name}</Typography>
+            <Typography variant="h4">{item.name}</Typography>
             <TaskView arrTasks={tasks} setParentTasks={setTasks}/>
             <div>
                 <Button variant="contained" onClick={toggleCollapsed}>
