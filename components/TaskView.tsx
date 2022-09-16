@@ -118,7 +118,7 @@ const TaskList: FC<TaskProps> = ({ arrTasks, setParentTasks }) => {
                                             value={task.name}
                                         />
                                         <Attribute
-                                            label="Body"
+                                            label="Description"
                                             value={task.body}
                                         />
                                         <Attribute

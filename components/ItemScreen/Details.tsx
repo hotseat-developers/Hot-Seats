@@ -63,10 +63,10 @@ const Details: FC = () => {
             {task ? (
                 <>
                     <Typography variant="h4">{task.name}</Typography>
-                    <Typography variant="h4"><DeviceThermostatIcon/>{task.temperature}F°</Typography>
                     <Typography variant="body1">{task.body}</Typography>
                     {task.type === "COOK" && (
                         <>
+                        <Typography variant="h4"><DeviceThermostatIcon/>{task.temperature}F°</Typography>
                             {!timer.isRunning && !canContinue ? (
                                 <>
                                     <Typography variant="h3">

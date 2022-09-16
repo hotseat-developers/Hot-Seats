@@ -10,8 +10,8 @@ type AttributeProps = {
   const Attribute: FC<AttributeProps> = ({ label, value }) => {
     return (
       <>
-        <Typography variant="h2">{label}</Typography>
-        <Typography variant="h3">{value}</Typography>
+        <Typography variant="h4">{label}</Typography>
+        <Typography variant="h5">{value}</Typography>
       </>
     )
     }
