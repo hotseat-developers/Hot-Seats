@@ -9,11 +9,31 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/cache": "^11.10.3",
+    "@emotion/react": "^11.10.4",
+    "@emotion/server": "^11.10.0",
+    "@emotion/styled": "^11.10.4",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.10.3",
+    "@mui/lab": "^5.0.0-alpha.98",
+    "@mui/material": "^5.10.3",
+    "@prisma/client": "^4.3.1",
+    "@supabase/supabase-js": "^1.35.6",
+    "formik": "^2.2.9",
+    "luxon": "^3.0.3",
     "next": "12.2.5",
+    "prisma": "^4.3.1",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-timer-hook": "^3.0.5",
+    "react-use": "^17.4.0",
+    "supabase": "^1.4.2",
+    "use-toast-mui": "^0.0.4",
+    "yup": "^0.32.11",
+    "yup-password": "^0.2.2"
   },
   "devDependencies": {
+    "@types/luxon": "^3.0.1",
     "@types/node": "18.7.14",
     "@types/react": "18.0.18",
     "@types/react-dom": "18.0.6",
