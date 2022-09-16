@@ -117,6 +117,8 @@ const Cook: NextPage = () => {
     const { playAudio: playBuzzer } = useContext(BuzzerAudioContext)
     const { playAudio: playDing } = useContext(DingAudioContext)
     const toast = useToast()
+
+    const getOrders = () => orders
     useEffect(() => {
         supabase
             .from<ItemOnOrder>("ItemOnOrder")
@@ -149,7 +151,6 @@ const Cook: NextPage = () => {
                         return collector
                     }, {}) || {}
                 )
-                console.log("newOrders", newOrders)
                 const newTimeTracker = Object.fromEntries(
                     Object.entries(newOrders).map(([orderId, order]) => {
                         return [
@@ -174,29 +175,29 @@ const Cook: NextPage = () => {
                     .select("Order!inner(*),Item(*, Task(*))")
                     // @ts-ignore
                     .eq("Order.id", payload.new.id)
-
-                setOrders({
+                setOrders(tempOrders => ({
                     [data![0].Order.id]: data!,
-                    ...orders,
-                })
+                    ...tempOrders,
+                }))
 
-                setStepTracker({
+                setStepTracker(tempStepTracker => ({
                     [data![0].Order.id]: Object.fromEntries(
                         data?.map(row => [row.Item.id, 0])!
                     ),
-                    ...stepTracker,
-                })
+                    ...tempStepTracker,
+                }))
 
-                setTabTracker({
+                setTabTracker(tempTabTracker => ({
                     [data![0].Order.id]: 0,
-                    ...tabTracker,
-                })
+                    ...tempTabTracker,
+                }))
 
-                setTimeTracker({
+                setTimeTracker(tempTimeTracker => ({
                     [data![0].Order.id]: Object.fromEntries(
                         data!.map(({ Item }) => [Item.id, false])
                     ),
-                })
+                    ...tempTimeTracker
+                }))
             })
             .subscribe()
 
