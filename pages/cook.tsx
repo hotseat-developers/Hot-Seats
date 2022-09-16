@@ -198,6 +198,8 @@ const Cook: NextPage = () => {
                     ),
                     ...tempTimeTracker
                 }))
+                playDing()
+                toast.info(`New order #${formatOrder(payload.new.id)} received`)
             })
             .subscribe()
 
