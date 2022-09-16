@@ -41,8 +41,7 @@ const Manager: NextPage = () => {
 
     return (
         <>
-            <Typography variant="h3">Who are we firing today?</Typography>
-            <BackButton />
+            <Typography variant="h3">What is on the menu today?</Typography>
 
             <NewItem onCreate={addItem} />
             <Box
@@ -78,6 +77,7 @@ const Manager: NextPage = () => {
                         </Box>
                     ))}
             </Box>
+                <BackButton />
         </>
     )
 }
