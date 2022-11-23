@@ -60,6 +60,7 @@ receive orders in real time and guide the staff on how to prep and cook the meal
 - [] Allow users to import their photos of food
 - [] Allow combo customizations
 - [] Allow item customization (example med rare steak/ soggy fries) 
+- [] Make a training mode and experienced mode
 
 ## The Team
 - Scrum Master : Will G.
