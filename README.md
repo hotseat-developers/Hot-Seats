@@ -61,6 +61,7 @@ receive orders in real time and guide the staff on how to prep and cook the meal
 - [] Allow combo customizations
 - [] Allow item customization (example med rare steak/ soggy fries) 
 - [] Make a training mode and experienced mode
+- [] Make an interface of occupied tables/food currently being made
 
 ## The Team
 - Scrum Master : Will G.
