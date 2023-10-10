@@ -5,6 +5,7 @@ import StoreIcon from "@mui/icons-material/Store"
 import HailIcon from "@mui/icons-material/Hail"
 import type { NextPage } from "next"
 import LogoutButton from "../components/LogoutButton"
+
 const Selection: NextPage = () => {
     return (
         <Container component="main" maxWidth="lg" sx={{ minHeight: "100vh" }}>

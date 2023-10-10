@@ -39,6 +39,13 @@ receive orders in real time and guide the staff on how to prep and cook the meal
 
 ![Main App](wireframes/Main_Screen.jpg)
 
+
+## Screenshots of Final product
+<img width="1437" alt="Screen Shot 2022-09-16 at 7 14 31 PM" src="https://user-images.githubusercontent.com/102195640/190836798-3237a1a4-316d-41be-85a9-19255ccdbe5c.png">
+<img width="1440" alt="Screen Shot 2022-09-16 at 7 15 48 PM" src="https://user-images.githubusercontent.com/102195640/190836808-f44d2419-29cd-4e82-9fde-cf03d502c226.png">
+<img width="1440" alt="Screen Shot 2022-09-16 at 7 14 50 PM" src="https://user-images.githubusercontent.com/102195640/190836791-e03c61e8-7fec-4441-aa3e-ccf09bd994a2.png">
+<img width="1440" alt="Screen Shot 2022-09-16 at 7 15 17 PM" src="https://user-images.githubusercontent.com/102195640/190836759-25b1fb8c-cb67-43a2-97c0-9f2b1ca76167.png">
+
 ## MVP Goals
 - [x] To allow users to log in and sign up via the login page and signup page
 - [x] Allow users to pick what role they are filling in for the day
@@ -52,6 +59,8 @@ receive orders in real time and guide the staff on how to prep and cook the meal
 - [] Allow users to import their photos of food
 - [] Allow combo customizations
 - [] Allow item customization (example med rare steak/ soggy fries) 
+- [] Make a training mode and experienced mode
+- [] Make an interface of occupied tables/food currently being made
 
 ## The Team
 - Scrum Master : Will G.
